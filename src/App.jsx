@@ -2,8 +2,12 @@ import React from "react";
 import "./assets/tailwind.css";
 import { Route, Routes } from "react-router-dom";
 import { Suspense } from "react";
+const Loading = React.lazy(() => import("./components/CoffeeLoading"));
 
 const GuestLayout = React.lazy(() => import("./layouts/GuestLayout"));
+
+const HomeGuest = React.lazy(() => import("./pages/HomeGuest"));
+
 
 function App() {
   return (
@@ -28,9 +32,9 @@ function App() {
 
         <Route element={<GuestLayout />}>
           <Route path="/guest" element={<HomeGuest />} />
-          <Route path="/guest/check-product" element={<CheckProduct />} />
+          {/* <Route path="/guest/check-product" element={<CheckProduct />} />
           <Route path="/about" element={<AboutPage />} />
-          <Route path="/testimonial" element={<TestimonialSection />} />
+          <Route path="/testimonial" element={<TestimonialSection />} /> */}
           {/* <Route path="/product" element={<OtherMenu />} /> */}
 
         </Route>
