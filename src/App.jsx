@@ -9,8 +9,8 @@ function App() {
   return (
     <Suspense fallback={<Loading />}>
       <Routes>
-        <Route path="*" element={<ErrorPage />} />
-        {/* <Route element={<MainLayout />}>
+        {/* <Route path="*" element={<ErrorPage />} />
+        <Route element={<MainLayout />}>
           <Route path="/" element={<Dashboard />} />
           <Route path="/orders" element={<Orders />} />
           <Route path="/customers" element={<Customers />} />
