@@ -1,0 +1,50 @@
+[
+  {
+    "id": 1,
+    "name": "Caramel Latte",
+    "description": "Espresso with caramel syrup and steamed milk.",
+    "price": 35000,
+    "image": "/images/caramel-latte.jpg",
+    "category": "Coffee"
+  },
+  {
+    "id": 2,
+    "name": "Iced Americano",
+    "description": "Strong and smooth espresso with chilled water & ice.",
+    "price": 28000,
+    "image": "/images/iced-americano.jpg",
+    "category": "Coffee"
+  },
+  {
+    "id": 3,
+    "name": "Matcha Latte",
+    "description": "Premium matcha blended with milk and sweetener.",
+    "price": 36000,
+    "image": "/images/matcha-latte.jpg",
+    "category": "Tea"
+  },
+  {
+    "id": 4,
+    "name": "Croissant Butter",
+    "description": "Freshly baked croissant with premium butter.",
+    "price": 22000,
+    "image": "/images/croissant.jpg",
+    "category": "Food"
+  },
+  {
+    "id": 5,
+    "name": "Avocado Coffee",
+    "description": "Unique blend of avocado and espresso.",
+    "price": 40000,
+    "image": "/images/avocado-coffee.jpg",
+    "category": "Coffee"
+  },
+  {
+    "id": 6,
+    "name": "Chocolate Chip Cookie",
+    "description": "Homemade cookie with chocolate chunks.",
+    "price": 18000,
+    "image": "/images/cookie.jpg",
+    "category": "Food"
+  }
+]
