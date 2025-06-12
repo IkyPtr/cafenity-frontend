@@ -1,10 +1,7 @@
-<html lang="en">
-<head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Project BPF</title>
-</head>
-<body>
-    
-</body>
-</html>
+export default function HomeGuest() {
+  return (
+    <div>
+      <h1>Halaman Utama Tamu</h1>
+    </div>
+  );
+}

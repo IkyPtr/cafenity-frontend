@@ -91,7 +91,7 @@ export default function CoffeeLoading({ text = "Brewing your coffee..." }) {
       </div>
       
       {/* CSS for animations */}
-      <style jsx>{`
+      <style>{`
         @keyframes float-up {
           0% { transform: translateY(0); opacity: 0; }
           50% { opacity: 0.7; }
