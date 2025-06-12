@@ -1,134 +1,108 @@
-import { useState, useEffect } from 'react';
-import styled from 'styled-components';
+import { useState, useEffect } from "react";
+import { Link } from "react-router-dom";
+import { FiMenu, FiX } from "react-icons/fi";
+import Logo from "./Logo"; // Pastikan path Logo benar
 
 export default function Navbar() {
   const [isDarkTheme, setIsDarkTheme] = useState(false);
   const [scrolled, setScrolled] = useState(false);
-
-  useEffect(() => {
-    const handleScroll = () => {
-      setScrolled(window.scrollY > 10);
-    };
-    window.addEventListener('scroll', handleScroll);
-    return () => window.removeEventListener('scroll', handleScroll);
-  }, []);
+  const [isOpen, setIsOpen] = useState(false);
 
   const toggleTheme = () => {
     setIsDarkTheme(!isDarkTheme);
-    // You might want to add theme switching logic here
+    // Di sini kamu bisa menyimpan tema ke localStorage jika perlu
   };
 
+  useEffect(() => {
+    const handleScroll = () => setScrolled(window.scrollY > 10);
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
+
+  const navLinks = [
+    { name: "About", to: "/about" },
+    { name: "Contact Us", to: "/contact" },
+    { name: "Menu", to: "/menu" },
+    { name: "Reservasi", to: "/reservasi" },
+  ];
+
   return (
-    <NavbarContainer $isDark={isDarkTheme} $scrolled={scrolled}>
-      <NavContent>
-        <Logo>Cafenity</Logo>
-        <NavLinks>
-          <NavLink>About</NavLink>
-          <NavLink>Contact Us</NavLink>
-          <NavLink>Menu</NavLink>
-          <NavLink>Reservasi</NavLink>
-          <ThemeToggle onClick={toggleTheme}>
-            {isDarkTheme ? 'LT' : 'DT'}
-          </ThemeToggle>
-        </NavLinks>
-      </NavContent>
-    </NavbarContainer>
+    <header
+      className={`fixed top-0 left-0 w-full z-50 transition-all duration-300 ${
+        isDarkTheme
+          ? "bg-teal-900/70 text-white"
+          : "bg-yellow-50/70 text-teal-900"
+      } ${scrolled ? "shadow-md backdrop-blur-xl border-b border-teal-200/20" : ""}`}
+    >
+      <div className="max-w-7xl mx-auto px-6 py-4 flex justify-between items-center">
+        <Logo />
+
+        {/* Desktop Menu */}
+        <nav className="hidden md:flex items-center space-x-8">
+          {navLinks.map((link) => (
+            <Link
+              key={link.name}
+              to={link.to}
+              className="font-medium hover:text-teal-500 transition"
+            >
+              {link.name}
+            </Link>
+          ))}
+          <button
+            onClick={toggleTheme}
+            className={`px-4 py-2 rounded-full font-semibold transition-all duration-200 ${
+              isDarkTheme
+                ? "bg-white/20 hover:bg-white/40 text-white"
+                : "bg-teal-100 hover:bg-teal-200 text-teal-900"
+            }`}
+          >
+            {isDarkTheme ? "LT" : "DT"}
+          </button>
+        </nav>
+
+        {/* Mobile Menu Button */}
+        <div className="md:hidden">
+          <button
+            onClick={() => setIsOpen(!isOpen)}
+            className="text-2xl focus:outline-none"
+          >
+            {isOpen ? <FiX /> : <FiMenu />}
+          </button>
+        </div>
+      </div>
+
+      {/* Mobile Dropdown */}
+      {isOpen && (
+        <div
+          className={`md:hidden px-6 pb-4 space-y-3 ${
+            isDarkTheme ? "bg-teal-900/80 text-white" : "bg-white text-teal-900"
+          }`}
+        >
+          {navLinks.map((link) => (
+            <Link
+              key={link.name}
+              to={link.to}
+              onClick={() => setIsOpen(false)}
+              className="block font-medium hover:text-teal-500 transition"
+            >
+              {link.name}
+            </Link>
+          ))}
+          <button
+            onClick={() => {
+              toggleTheme();
+              setIsOpen(false);
+            }}
+            className={`block w-full text-center py-2 rounded-full font-semibold transition ${
+              isDarkTheme
+                ? "bg-white/20 hover:bg-white/40 text-white"
+                : "bg-teal-100 hover:bg-teal-200 text-teal-900"
+            }`}
+          >
+            {isDarkTheme ? "Switch to Light" : "Switch to Dark"}
+          </button>
+        </div>
+      )}
+    </header>
   );
 }
-
-const NavbarContainer = styled.div`
-  position: fixed;
-  top: 0;
-  width: 100%;
-  padding: 1rem 2rem;
-  z-index: 1000;
-  transition: all 0.3s ease;
-  
-  /* Liquid glass effect */
-  background: ${props => props.$isDark 
-    ? 'rgba(9, 107, 104, 0.7)' 
-    : 'rgba(255, 251, 222, 0.7)'};
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  box-shadow: ${props => props.$scrolled 
-    ? '0 4px 20px rgba(0, 0, 0, 0.1)' 
-    : 'none'};
-  border-bottom: ${props => props.$scrolled 
-    ? '1px solid rgba(144, 209, 202, 0.2)' 
-    : 'none'};
-`;
-
-const NavContent = styled.div`
-  max-width: 1200px;
-  margin: 0 auto;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-`;
-
-const Logo = styled.div`
-  font-size: 1.8rem;
-  font-weight: 700;
-  color: ${props => props.theme.isDark ? '#FFFBDE' : '#096B68'};
-  font-family: 'Playfair Display', serif;
-  letter-spacing: 1px;
-  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-  
-  &:hover {
-    color: #129990;
-    cursor: pointer;
-  }
-`;
-
-const NavLinks = styled.div`
-  display: flex;
-  gap: 2rem;
-  align-items: center;
-`;
-
-const NavLink = styled.div`
-  position: relative;
-  font-size: 1rem;
-  font-weight: 500;
-  color: ${props => props.theme.isDark ? '#FFFBDE' : '#096B68'};
-  cursor: pointer;
-  transition: color 0.3s ease;
-  
-  &:hover {
-    color: #129990;
-  }
-  
-  &::after {
-    content: '';
-    position: absolute;
-    bottom: -5px;
-    left: 0;
-    width: 0;
-    height: 2px;
-    background-color: #90D1CA;
-    transition: width 0.3s ease;
-  }
-  
-  &:hover::after {
-    width: 100%;
-  }
-`;
-
-const ThemeToggle = styled.div`
-  padding: 0.5rem 1rem;
-  border-radius: 20px;
-  background: ${props => props.theme.isDark 
-    ? 'rgba(255, 251, 222, 0.2)' 
-    : 'rgba(9, 107, 104, 0.2)'};
-  color: ${props => props.theme.isDark ? '#FFFBDE' : '#096B68'};
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  
-  &:hover {
-    background: ${props => props.theme.isDark 
-      ? 'rgba(255, 251, 222, 0.4)' 
-      : 'rgba(9, 107, 104, 0.4)'};
-    transform: scale(1.05);
-  }
-`;

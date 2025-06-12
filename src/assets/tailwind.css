@@ -1,6 +1,7 @@
-@plugin "daisyui" {
+@import "tailwindcss";
+/* @plugin "daisyui" {
     themes: light --default, dark --prefersdark, cupcake;
-}
+} */
 
 @font-face {
     font-family: 'Barlow';
