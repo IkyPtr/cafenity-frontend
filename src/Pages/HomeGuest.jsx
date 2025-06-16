@@ -530,67 +530,7 @@ const TestimonialSection = () => {
   );
 };
 
-const FooterSection = () => {
-  return (
-    <footer className="bg-[#243137] text-white py-16">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="grid md:grid-cols-4 gap-8">
-          <div className="col-span-2">
-            <div className="flex items-center mb-6">
-              <div className="w-12 h-12 bg-[#bd9f67] rounded-full flex items-center justify-center mr-4">
-                <FiCoffee className="w-6 h-6 text-white" />
-              </div>
-              <h3 className="text-2xl font-bold text-[#bd9f67] font-poppins">
-                Cafenity
-              </h3>
-            </div>
-            <p className="text-gray-300 mb-6 font-barlow max-w-md">
-              Tempat di mana setiap cangkir kopi menceritakan kisah, dan setiap 
-              momen menjadi kenangan yang berharga.
-            </p>
-            <div className="flex space-x-4">
-              <div className="w-10 h-10 bg-[#bd9f67] rounded-full flex items-center justify-center cursor-pointer hover:bg-[#bd9f67]/80 transition-colors">
-                <span className="text-white font-bold">f</span>
-              </div>
-              <div className="w-10 h-10 bg-[#bd9f67] rounded-full flex items-center justify-center cursor-pointer hover:bg-[#bd9f67]/80 transition-colors">
-                <span className="text-white font-bold">@</span>
-              </div>
-              <div className="w-10 h-10 bg-[#bd9f67] rounded-full flex items-center justify-center cursor-pointer hover:bg-[#bd9f67]/80 transition-colors">
-                <span className="text-white font-bold">in</span>
-              </div>
-            </div>
-          </div>
 
-          <div>
-            <h4 className="text-lg font-bold mb-6 font-poppins">Menu</h4>
-            <ul className="space-y-3 font-barlow">
-              <li><a href="#" className="text-gray-300 hover:text-[#bd9f67] transition-colors">Kopi</a></li>
-              <li><a href="#" className="text-gray-300 hover:text-[#bd9f67] transition-colors">Teh</a></li>
-              <li><a href="#" className="text-gray-300 hover:text-[#bd9f67] transition-colors">Makanan</a></li>
-              <li><a href="#" className="text-gray-300 hover:text-[#bd9f67] transition-colors">Dessert</a></li>
-            </ul>
-          </div>
-
-          <div>
-            <h4 className="text-lg font-bold mb-6 font-poppins">Layanan</h4>
-            <ul className="space-y-3 font-barlow">
-              <li><a href="#" className="text-gray-300 hover:text-[#bd9f67] transition-colors">Reservasi</a></li>
-              <li><a href="#" className="text-gray-300 hover:text-[#bd9f67] transition-colors">Catering</a></li>
-              <li><a href="#" className="text-gray-300 hover:text-[#bd9f67] transition-colors">Private Event</a></li>
-              <li><a href="#" className="text-gray-300 hover:text-[#bd9f67] transition-colors">Delivery</a></li>
-            </ul>
-          </div>
-        </div>
-
-        <div className="border-t border-gray-600 mt-12 pt-8 text-center">
-          <p className="text-gray-400 font-barlow">
-            © 2024 Cafenity. All rights reserved. Made with ❤️ for coffee lovers.
-          </p>
-        </div>
-      </div>
-    </footer>
-  );
-};
 
 export default function HomeGuest() {
   return (
@@ -601,7 +541,7 @@ export default function HomeGuest() {
       <MenuPreviewSection />
       <TestimonialSection />
       <ContactSection />
-      <FooterSection />
+      
     </div>
   );
 }
