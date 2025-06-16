@@ -1,13 +1,62 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { FiPlus, FiMinus, FiShoppingCart, FiChevronRight } from 'react-icons/fi';
-import menuData from '/src/assets/menu.json';
+import { supabase } from '../lib/supabase';
 
 export default function MenuPage() {
-  const [menuItems] = useState(menuData);
-  const [quantities, setQuantities] = useState(
-    menuData.reduce((acc, item) => ({ ...acc, [item.id]: 0 }), {})
-  );
+  const [categories, setCategories] = useState([]);
+  const [products, setProducts] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [quantities, setQuantities] = useState({});
   const [showMenu, setShowMenu] = useState(false);
+  const [activeCategory, setActiveCategory] = useState('All');
+
+  useEffect(() => {
+    fetchMenuData();
+  }, []);
+
+  const fetchMenuData = async () => {
+    try {
+      setLoading(true);
+      
+      // Fetch categories
+      const { data: categoriesData, error: categoriesError } = await supabase
+        .from('categories')
+        .select('*')
+        .eq('is_active', true)
+        .order('sort_order');
+
+      if (categoriesError) throw categoriesError;
+
+      // Fetch products with category info
+      const { data: productsData, error: productsError } = await supabase
+        .from('products')
+        .select(`
+          *,
+          categories (
+            name
+          )
+        `)
+        .eq('is_available', true)
+        .order('created_at');
+
+      if (productsError) throw productsError;
+
+      setCategories(categoriesData || []);
+      setProducts(productsData || []);
+      
+      // Initialize quantities
+      const initialQuantities = {};
+      productsData?.forEach(product => {
+        initialQuantities[product.id] = 0;
+      });
+      setQuantities(initialQuantities);
+
+    } catch (error) {
+      console.error('Error fetching menu data:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const formatPrice = (price) => {
     return new Intl.NumberFormat('id-ID', {
@@ -22,13 +71,22 @@ export default function MenuPage() {
     setQuantities((prev) => ({ ...prev, [id]: newValue }));
   };
 
-  const categories = ['All', ...new Set(menuItems.map((item) => item.category))];
-  const [activeCategory, setActiveCategory] = useState('All');
+  const categoryNames = ['All', ...categories.map(cat => cat.name)];
 
-  const filteredItems =
-    activeCategory === 'All'
-      ? menuItems
-      : menuItems.filter((item) => item.category === activeCategory);
+  const filteredProducts = activeCategory === 'All' 
+    ? products 
+    : products.filter(product => product.categories?.name === activeCategory);
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-[#f0f8ff] to-[#e0f7fa] flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-cyan-600 mx-auto mb-4"></div>
+          <p className="text-cyan-700 text-lg">Loading menu...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-[#f0f8ff] to-[#e0f7fa]">
@@ -180,12 +238,12 @@ export default function MenuPage() {
                 <FiChevronRight className="rotate-180 mr-1" /> Back to Overview
               </button>
               <h2 className="text-3xl font-bold text-cyan-900">Our Menu</h2>
-              <div className="w-24"></div> {/* Spacer for alignment */}
+              <div className="w-24"></div>
             </div>
 
             {/* Category filter */}
             <div className="flex flex-wrap justify-center gap-3 mb-12">
-              {categories.map((category) => (
+              {categoryNames.map((category) => (
                 <button
                   key={category}
                   onClick={() => setActiveCategory(category)}
@@ -202,19 +260,19 @@ export default function MenuPage() {
 
             {/* Menu items grid */}
             <div className="grid gap-8 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
-              {filteredItems.map((item) => (
+              {filteredProducts.map((item) => (
                 <div
                   key={item.id}
                   className="bg-white/70 backdrop-blur-lg rounded-2xl overflow-hidden shadow-xl hover:shadow-2xl transition-all duration-300 border border-white/40"
                 >
                   <div className="relative h-48 overflow-hidden">
                     <img
-                      src={item.image}
+                      src={item.image_url || 'https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?w=400'}
                       alt={item.name}
                       className="w-full h-full object-cover transition-transform duration-500 hover:scale-110"
                     />
                     <div className="absolute top-4 right-4 bg-white/90 text-cyan-700 text-xs px-3 py-1 rounded-full shadow-sm">
-                      {item.category}
+                      {item.categories?.name || 'Menu'}
                     </div>
                   </div>
                   <div className="p-6">
@@ -227,14 +285,14 @@ export default function MenuPage() {
                     <p className="text-sm text-cyan-700/80 mb-5">{item.description}</p>
                     <div className="flex items-center justify-between">
                       <div className="flex items-center bg-white rounded-full p-1 shadow-inner border border-cyan-100">
-                        <button
+                                                <button
                           onClick={() => handleQuantityChange(item.id, quantities[item.id] - 1)}
                           className="w-8 h-8 flex items-center justify-center rounded-full bg-cyan-50 text-cyan-700 hover:bg-cyan-100 transition-colors"
                         >
                           <FiMinus size={14} />
                         </button>
                         <span className="mx-3 w-6 text-center font-medium text-cyan-900">
-                          {quantities[item.id]}
+                          {quantities[item.id] || 0}
                         </span>
                         <button
                           onClick={() => handleQuantityChange(item.id, quantities[item.id] + 1)}
@@ -259,6 +317,15 @@ export default function MenuPage() {
                 </div>
               ))}
             </div>
+
+            {/* Empty state when no products found */}
+            {filteredProducts.length === 0 && (
+              <div className="text-center py-12">
+                <div className="text-6xl mb-4">☕</div>
+                <h3 className="text-2xl font-bold text-cyan-800 mb-2">No items found</h3>
+                <p className="text-cyan-600">Try selecting a different category</p>
+              </div>
+            )}
           </>
         )}
       </div>
