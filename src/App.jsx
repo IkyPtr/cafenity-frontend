@@ -8,7 +8,7 @@ const CoffeeLoading = React.lazy(() => import("./components/CoffeeLoading"));
 
 const GuestLayout = React.lazy(() => import("./layouts/GuestLayout"));
 
-const HomeGuest = React.lazy(() => import("./pages/HomeGuest"));
+const HomeGuest = React.lazy(() => import("./Pages/HomeGuest"));
 
 const Contact = React.lazy(() => import("./Pages/Contact"));
 
