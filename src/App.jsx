@@ -10,6 +10,9 @@ const GuestLayout = React.lazy(() => import("./layouts/GuestLayout"));
 
 const HomeGuest = React.lazy(() => import("./pages/HomeGuest"));
 
+const Contact = React.lazy(() => import("./Pages/Contact"));
+
+const About = React.lazy(() => import("./Pages/AboutPage"));
 
 function App() {
   return (
@@ -19,8 +22,8 @@ function App() {
           <Route path="/" element={<HomeGuest />} />
           <Route path="/menu" element={<MenuPage />} />
           <Route path="/reservasi" element={<ReservationPage />} />
-
-
+          <Route path="/contact" element={<Contact />} />
+          <Route path="/about" element={<About />} />
         </Route>
       </Routes>
     </Suspense>
