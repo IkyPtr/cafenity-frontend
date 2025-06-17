@@ -1,6 +1,11 @@
-import { useState, useEffect } from 'react';
-import { FiPlus, FiMinus, FiShoppingCart, FiChevronRight } from 'react-icons/fi';
-import { supabase } from '../lib/supabase';
+import { useState, useEffect } from "react";
+import {
+  FiPlus,
+  FiMinus,
+  FiShoppingCart,
+  FiChevronRight,
+} from "react-icons/fi";
+import { supabase } from "../lib/supabase";
 
 export default function MenuPage() {
   const [categories, setCategories] = useState([]);
@@ -8,7 +13,7 @@ export default function MenuPage() {
   const [loading, setLoading] = useState(true);
   const [quantities, setQuantities] = useState({});
   const [showMenu, setShowMenu] = useState(false);
-  const [activeCategory, setActiveCategory] = useState('All');
+  const [activeCategory, setActiveCategory] = useState("All");
 
   useEffect(() => {
     fetchMenuData();
@@ -17,51 +22,52 @@ export default function MenuPage() {
   const fetchMenuData = async () => {
     try {
       setLoading(true);
-      
+
       // Fetch categories
       const { data: categoriesData, error: categoriesError } = await supabase
-        .from('categories')
-        .select('*')
-        .eq('is_active', true)
-        .order('sort_order');
+        .from("categories")
+        .select("*")
+        .eq("is_active", true)
+        .order("sort_order");
 
       if (categoriesError) throw categoriesError;
 
       // Fetch products with category info
       const { data: productsData, error: productsError } = await supabase
-        .from('products')
-        .select(`
+        .from("products")
+        .select(
+          `
           *,
           categories (
             name
           )
-        `)
-        .eq('is_available', true)
-        .order('created_at');
+        `
+        )
+        .eq("is_available", true)
+        .order("created_at");
 
       if (productsError) throw productsError;
 
       setCategories(categoriesData || []);
       setProducts(productsData || []);
-      
+
       // Initialize quantities
       const initialQuantities = {};
-      productsData?.forEach(product => {
+      productsData?.forEach((product) => {
         initialQuantities[product.id] = 0;
       });
       setQuantities(initialQuantities);
-
     } catch (error) {
-      console.error('Error fetching menu data:', error);
+      console.error("Error fetching menu data:", error);
     } finally {
       setLoading(false);
     }
   };
 
   const formatPrice = (price) => {
-    return new Intl.NumberFormat('id-ID', {
-      style: 'currency',
-      currency: 'IDR',
+    return new Intl.NumberFormat("id-ID", {
+      style: "currency",
+      currency: "IDR",
       maximumFractionDigits: 0,
     }).format(price);
   };
@@ -71,11 +77,14 @@ export default function MenuPage() {
     setQuantities((prev) => ({ ...prev, [id]: newValue }));
   };
 
-  const categoryNames = ['All', ...categories.map(cat => cat.name)];
+  const categoryNames = ["All", ...categories.map((cat) => cat.name)];
 
-  const filteredProducts = activeCategory === 'All' 
-    ? products 
-    : products.filter(product => product.categories?.name === activeCategory);
+  const filteredProducts =
+    activeCategory === "All"
+      ? products
+      : products.filter(
+          (product) => product.categories?.name === activeCategory
+        );
 
   if (loading) {
     return (
@@ -101,9 +110,11 @@ export default function MenuPage() {
               height: `${Math.random() * 400 + 100}px`,
               top: `${Math.random() * 100}%`,
               left: `${Math.random() * 100}%`,
-              filter: 'blur(80px)',
+              filter: "blur(80px)",
               opacity: 0.4,
-              animation: `liquid-float ${Math.random() * 20 + 10}s infinite alternate ease-in-out`,
+              animation: `liquid-float ${
+                Math.random() * 20 + 10
+              }s infinite alternate ease-in-out`,
               animationDelay: `${i * 2}s`,
             }}
           />
@@ -114,12 +125,13 @@ export default function MenuPage() {
         {!showMenu ? (
           <>
             {/* Hero content section */}
-            <div className="text-center mb-16">
+            <div className="text-center mb-16 pt-20">
               <h1 className="text-5xl md:text-6xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-cyan-600 to-teal-600 mb-6">
                 Taste the Experience
               </h1>
               <p className="text-xl text-cyan-800/80 max-w-3xl mx-auto">
-                Discover our carefully crafted beverages and culinary creations before diving into the menu
+                Discover our carefully crafted beverages and culinary creations
+                before diving into the menu
               </p>
             </div>
 
@@ -134,10 +146,15 @@ export default function MenuPage() {
                   className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
                 />
                 <div className="absolute bottom-0 left-0 z-20 p-6 w-full">
-                  <p className="text-sm text-white/80 uppercase font-semibold mb-2">Our Journey</p>
-                  <h3 className="text-2xl font-bold text-white mb-4">The Art of Craftsmanship</h3>
+                  <p className="text-sm text-white/80 uppercase font-semibold mb-2">
+                    Our Journey
+                  </p>
+                  <h3 className="text-2xl font-bold text-white mb-4">
+                    The Art of Craftsmanship
+                  </h3>
                   <p className="text-white/90 mb-4">
-                    Discover how our passion for quality ingredients transforms into exceptional flavors
+                    Discover how our passion for quality ingredients transforms
+                    into exceptional flavors
                   </p>
                   <button className="flex items-center text-white group-hover:text-cyan-300 transition-colors">
                     Read our story <FiChevronRight className="ml-1" />
@@ -154,8 +171,12 @@ export default function MenuPage() {
                   className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
                 />
                 <div className="absolute bottom-0 left-0 z-20 p-6 w-full backdrop-blur-sm bg-white/5 border-t border-white/10">
-                  <p className="text-sm text-white/80 uppercase font-semibold mb-2">Behind the Scenes</p>
-                  <h3 className="text-2xl font-bold text-white mb-4">From Farm to Cup</h3>
+                  <p className="text-sm text-white/80 uppercase font-semibold mb-2">
+                    Behind the Scenes
+                  </p>
+                  <h3 className="text-2xl font-bold text-white mb-4">
+                    From Farm to Cup
+                  </h3>
                   <p className="text-white/90 mb-4">
                     Our sustainable sourcing and meticulous preparation process
                   </p>
@@ -169,12 +190,17 @@ export default function MenuPage() {
               <div className="relative h-[400px] rounded-2xl overflow-hidden group col-span-1 md:col-span-2 lg:col-span-1">
                 <div className="absolute inset-0 bg-gradient-to-br from-cyan-600/80 to-teal-600/80 z-10" />
                 <div className="absolute inset-0 flex flex-col justify-center items-center text-center z-20 p-8">
-                  <p className="text-sm text-white/90 uppercase font-semibold mb-4">Seasonal Special</p>
-                  <h3 className="text-3xl font-bold text-white mb-6">Summer Breeze Collection</h3>
-                  <p className="text-white/90 mb-8 max-w-md">
-                    Experience our limited-time offerings featuring fresh, seasonal ingredients
+                  <p className="text-sm text-white/90 uppercase font-semibold mb-4">
+                    Seasonal Special
                   </p>
-                  <button 
+                  <h3 className="text-3xl font-bold text-white mb-6">
+                    Summer Breeze Collection
+                  </h3>
+                  <p className="text-white/90 mb-8 max-w-md">
+                    Experience our limited-time offerings featuring fresh,
+                    seasonal ingredients
+                  </p>
+                  <button
                     onClick={() => setShowMenu(true)}
                     className="px-8 py-3 bg-white text-cyan-700 rounded-full font-semibold hover:bg-cyan-50 transition-colors flex items-center"
                   >
@@ -192,9 +218,9 @@ export default function MenuPage() {
               <div className="bg-white/30 backdrop-blur-lg rounded-2xl p-8 border border-white/40 shadow-lg">
                 <div className="flex items-center mb-6">
                   <div className="w-12 h-12 rounded-full overflow-hidden mr-4">
-                    <img 
-                      src="https://randomuser.me/api/portraits/women/44.jpg" 
-                      alt="Customer" 
+                    <img
+                      src="https://randomuser.me/api/portraits/women/44.jpg"
+                      alt="Customer"
                       className="w-full h-full object-cover"
                     />
                   </div>
@@ -204,15 +230,16 @@ export default function MenuPage() {
                   </div>
                 </div>
                 <p className="text-cyan-900 italic">
-                  "The attention to detail in every drink is remarkable. I've never tasted such perfectly balanced flavors anywhere else."
+                  "The attention to detail in every drink is remarkable. I've
+                  never tasted such perfectly balanced flavors anywhere else."
                 </p>
               </div>
               <div className="bg-white/30 backdrop-blur-lg rounded-2xl p-8 border border-white/40 shadow-lg">
                 <div className="flex items-center mb-6">
                   <div className="w-12 h-12 rounded-full overflow-hidden mr-4">
-                    <img 
-                      src="https://randomuser.me/api/portraits/men/32.jpg" 
-                      alt="Customer" 
+                    <img
+                      src="https://randomuser.me/api/portraits/men/32.jpg"
+                      alt="Customer"
                       className="w-full h-full object-cover"
                     />
                   </div>
@@ -222,7 +249,8 @@ export default function MenuPage() {
                   </div>
                 </div>
                 <p className="text-cyan-900 italic">
-                  "This place has become my daily ritual. The quality is consistent and the atmosphere makes every visit special."
+                  "This place has become my daily ritual. The quality is
+                  consistent and the atmosphere makes every visit special."
                 </p>
               </div>
             </div>
@@ -231,7 +259,7 @@ export default function MenuPage() {
           <>
             {/* Menu section */}
             <div className="flex justify-between items-center mb-12">
-              <button 
+              <button
                 onClick={() => setShowMenu(false)}
                 className="flex items-center text-cyan-700 hover:text-cyan-600 transition-colors"
               >
@@ -249,8 +277,8 @@ export default function MenuPage() {
                   onClick={() => setActiveCategory(category)}
                   className={`px-5 py-2 rounded-full text-sm font-medium transition-all duration-300 ${
                     activeCategory === category
-                      ? 'bg-cyan-600 text-white shadow-md'
-                      : 'bg-white/70 text-cyan-700 hover:bg-white'
+                      ? "bg-cyan-600 text-white shadow-md"
+                      : "bg-white/70 text-cyan-700 hover:bg-white"
                   }`}
                 >
                   {category}
@@ -267,26 +295,38 @@ export default function MenuPage() {
                 >
                   <div className="relative h-48 overflow-hidden">
                     <img
-                      src={item.image_url || 'https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?w=400'}
+                      src={
+                        item.image_url ||
+                        "https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?w=400"
+                      }
                       alt={item.name}
                       className="w-full h-full object-cover transition-transform duration-500 hover:scale-110"
                     />
                     <div className="absolute top-4 right-4 bg-white/90 text-cyan-700 text-xs px-3 py-1 rounded-full shadow-sm">
-                      {item.categories?.name || 'Menu'}
+                      {item.categories?.name || "Menu"}
                     </div>
                   </div>
                   <div className="p-6">
                     <div className="flex justify-between items-start mb-3">
-                      <h3 className="text-xl font-bold text-cyan-900">{item.name}</h3>
+                      <h3 className="text-xl font-bold text-cyan-900">
+                        {item.name}
+                      </h3>
                       <p className="text-cyan-700 font-semibold">
                         {formatPrice(item.price)}
                       </p>
                     </div>
-                    <p className="text-sm text-cyan-700/80 mb-5">{item.description}</p>
+                    <p className="text-sm text-cyan-700/80 mb-5">
+                      {item.description}
+                    </p>
                     <div className="flex items-center justify-between">
                       <div className="flex items-center bg-white rounded-full p-1 shadow-inner border border-cyan-100">
-                                                <button
-                          onClick={() => handleQuantityChange(item.id, quantities[item.id] - 1)}
+                        <button
+                          onClick={() =>
+                            handleQuantityChange(
+                              item.id,
+                              quantities[item.id] - 1
+                            )
+                          }
                           className="w-8 h-8 flex items-center justify-center rounded-full bg-cyan-50 text-cyan-700 hover:bg-cyan-100 transition-colors"
                         >
                           <FiMinus size={14} />
@@ -295,7 +335,12 @@ export default function MenuPage() {
                           {quantities[item.id] || 0}
                         </span>
                         <button
-                          onClick={() => handleQuantityChange(item.id, quantities[item.id] + 1)}
+                          onClick={() =>
+                            handleQuantityChange(
+                              item.id,
+                              quantities[item.id] + 1
+                            )
+                          }
                           className="w-8 h-8 flex items-center justify-center rounded-full bg-cyan-50 text-cyan-700 hover:bg-cyan-100 transition-colors"
                         >
                           <FiPlus size={14} />
@@ -305,8 +350,8 @@ export default function MenuPage() {
                         disabled={quantities[item.id] === 0}
                         className={`px-4 py-2 rounded-full text-sm font-medium transition-all ${
                           quantities[item.id] > 0
-                            ? 'bg-cyan-600 text-white hover:bg-cyan-700 shadow-md'
-                            : 'bg-gray-200 text-gray-500 cursor-not-allowed'
+                            ? "bg-cyan-600 text-white hover:bg-cyan-700 shadow-md"
+                            : "bg-gray-200 text-gray-500 cursor-not-allowed"
                         }`}
                       >
                         <FiShoppingCart className="inline mr-2" />
@@ -322,8 +367,12 @@ export default function MenuPage() {
             {filteredProducts.length === 0 && (
               <div className="text-center py-12">
                 <div className="text-6xl mb-4">☕</div>
-                <h3 className="text-2xl font-bold text-cyan-800 mb-2">No items found</h3>
-                <p className="text-cyan-600">Try selecting a different category</p>
+                <h3 className="text-2xl font-bold text-cyan-800 mb-2">
+                  No items found
+                </h3>
+                <p className="text-cyan-600">
+                  Try selecting a different category
+                </p>
               </div>
             )}
           </>
