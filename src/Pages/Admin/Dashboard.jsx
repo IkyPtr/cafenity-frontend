@@ -1,10 +1,15 @@
 import React from "react";
 import { FaShoppingCart, FaTruck, FaBan, FaDollarSign } from "react-icons/fa";
-import MenuAdmin from "../../components/MenuAdmin";
+import HeaderAdmin from "../../components/Admin/HeaderAdmin";
+import SidebarAdmin from "../../components/Admin/SidebarAdmin";
+
 
 export default function Dashboard() {
   return (
-    <MenuAdmin>
+    <div className="flex h-screen bg-gray-100">
+      <SidebarAdmin />
+      <div className="flex-1 flex flex-col">
+        <HeaderAdmin />
       <div className="p-5">
 
         {/* Tambahan header langsung disini */}
@@ -24,6 +29,7 @@ export default function Dashboard() {
         </div>
 
       </div>
-    </MenuAdmin>
+      </div>
+    </div>
   );
 }
