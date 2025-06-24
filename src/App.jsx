@@ -18,6 +18,12 @@ const MenuPage = React.lazy(() => import("./pages/MenuPage"));
 
 const ReservationPage = React.lazy(() => import("./Pages/ReservationPage"));
 
+const Dashboard = React.lazy(() => import("./Pages/Admin/Dashboard"));
+
+const ReservasiPesanan = React.lazy(() => import("./Pages/Admin/ReservasiPesanan"));
+
+const AdminLayout = React.lazy(() => import("./layouts/AdminLayout"));
+
 function App() {
   return (
     <Suspense fallback={<CoffeeLoading />}>
@@ -28,6 +34,12 @@ function App() {
           <Route path="/reservasi" element={<ReservationPage />} />
           <Route path="/contact" element={<Contact />} />
           <Route path="/about" element={<About />} />
+        </Route>
+      </Routes>
+      <Routes>
+        <Route element={<AdminLayout />}>
+          <Route path="/dashboard" element={<Dashboard />} />
+          <Route path="/reservasiPesanan" element={<ReservasiPesanan />} />
         </Route>
       </Routes>
     </Suspense>

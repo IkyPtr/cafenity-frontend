@@ -318,46 +318,6 @@ export default function MenuPage() {
                     <p className="text-sm text-cyan-700/80 mb-5">
                       {item.description}
                     </p>
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center bg-white rounded-full p-1 shadow-inner border border-cyan-100">
-                        <button
-                          onClick={() =>
-                            handleQuantityChange(
-                              item.id,
-                              quantities[item.id] - 1
-                            )
-                          }
-                          className="w-8 h-8 flex items-center justify-center rounded-full bg-cyan-50 text-cyan-700 hover:bg-cyan-100 transition-colors"
-                        >
-                          <FiMinus size={14} />
-                        </button>
-                        <span className="mx-3 w-6 text-center font-medium text-cyan-900">
-                          {quantities[item.id] || 0}
-                        </span>
-                        <button
-                          onClick={() =>
-                            handleQuantityChange(
-                              item.id,
-                              quantities[item.id] + 1
-                            )
-                          }
-                          className="w-8 h-8 flex items-center justify-center rounded-full bg-cyan-50 text-cyan-700 hover:bg-cyan-100 transition-colors"
-                        >
-                          <FiPlus size={14} />
-                        </button>
-                      </div>
-                      <button
-                        disabled={quantities[item.id] === 0}
-                        className={`px-4 py-2 rounded-full text-sm font-medium transition-all ${
-                          quantities[item.id] > 0
-                            ? "bg-cyan-600 text-white hover:bg-cyan-700 shadow-md"
-                            : "bg-gray-200 text-gray-500 cursor-not-allowed"
-                        }`}
-                      >
-                        <FiShoppingCart className="inline mr-2" />
-                        Add
-                      </button>
-                    </div>
                   </div>
                 </div>
               ))}

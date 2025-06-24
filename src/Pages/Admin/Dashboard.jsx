@@ -1,6 +1,6 @@
 import React from "react";
 import { FaShoppingCart, FaTruck, FaBan, FaDollarSign } from "react-icons/fa";
-import MenuAdmin from "../components/MenuAdmin";
+import MenuAdmin from "../../components/MenuAdmin";
 
 export default function Dashboard() {
   return (
