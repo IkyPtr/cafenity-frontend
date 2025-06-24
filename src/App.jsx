@@ -7,13 +7,13 @@ const CoffeeLoading = React.lazy(() => import("./components/CoffeeLoading"));
 
 const GuestLayout = React.lazy(() => import("./layouts/GuestLayout"));
 
-const HomeGuest = React.lazy(() => import("./pages/HomeGuest"));
+const HomeGuest = React.lazy(() => import("./Pages/HomeGuest"));
 
 const Contact = React.lazy(() => import("./Pages/Contact"));
 
 const About = React.lazy(() => import("./Pages/AboutPage"));
 
-const MenuPage = React.lazy(() => import("./pages/MenuPage"));
+const MenuPage = React.lazy(() => import("./Pages/MenuPage"));
 
 const ReservationPage = React.lazy(() => import("./Pages/ReservationPage"));
 
