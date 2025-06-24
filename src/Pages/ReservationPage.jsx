@@ -1,7 +1,30 @@
-import { useState } from 'react';
-import { FiCalendar, FiClock, FiUser, FiMail, FiPhone, FiUsers } from 'react-icons/fi';
-import { motion } from 'framer-motion';
+import { useState, useEffect } from 'react';
+import { FiCalendar, FiClock, FiUser, FiMail, FiPhone, FiUsers, FiMinus, FiPlus, FiCheck } from 'react-icons/fi';
+import { motion, AnimatePresence } from 'framer-motion';
 import { supabase } from '../lib/supabase';
+
+// Framer Motion Variants untuk animasi yang elegan
+const containerVariants = {
+  hidden: { opacity: 0 },
+  visible: {
+    opacity: 1,
+    transition: {
+      staggerChildren: 0.1,
+    },
+  },
+};
+
+const itemVariants = {
+  hidden: { opacity: 0, y: 20 },
+  visible: {
+    opacity: 1,
+    y: 0,
+    transition: {
+      type: 'spring',
+      stiffness: 100,
+    },
+  },
+};
 
 export default function ReservationPage() {
   const [formData, setFormData] = useState({
@@ -11,337 +34,264 @@ export default function ReservationPage() {
     reservation_date: '',
     reservation_time: '',
     guest_count: 2,
-    special_requests: ''
+    special_requests: '',
   });
 
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitSuccess, setSubmitSuccess] = useState(false);
   const [submitError, setSubmitError] = useState('');
 
+  // Set tanggal minimum ke hari ini
+  const today = new Date().toISOString().split('T')[0];
+
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setFormData(prev => ({
-      ...prev,
-      [name]: value
-    }));
+    setFormData((prev) => ({ ...prev, [name]: value }));
   };
+  
+  const handleGuestChange = (amount) => {
+      setFormData(prev => ({
+          ...prev,
+          guest_count: Math.max(1, Math.min(12, prev.guest_count + amount)) // Batasi antara 1 dan 12
+      }));
+  }
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setIsSubmitting(true);
     setSubmitError('');
 
-    // Debug: Log form data
-    console.log('Form data being submitted:', formData);
-
     try {
-      const insertData = {
-        name: formData.name,
-        email: formData.email,
-        phone: formData.phone,
-        reservation_date: formData.reservation_date,
-        reservation_time: formData.reservation_time,
-        guest_count: parseInt(formData.guest_count),
-        special_requests: formData.special_requests || null
-      };
+      const { data, error } = await supabase.from('reservations').insert([
+        {
+          name: formData.name,
+          email: formData.email,
+          phone: formData.phone,
+          reservation_date: formData.reservation_date,
+          reservation_time: formData.reservation_time,
+          guest_count: parseInt(formData.guest_count, 10),
+          special_requests: formData.special_requests || null,
+        },
+      ]);
 
-      // Debug: Log insert data
-      console.log('Insert data:', insertData);
-
-      const { data, error } = await supabase
-        .from('reservations')
-        .insert([insertData]);
-
-      // Debug: Log response
-      console.log('Supabase response:', { data, error });
-
-      if (error) {
-        console.error('Supabase error details:', error);
-        throw error;
-      }
+      if (error) throw error;
 
       setSubmitSuccess(true);
-      setIsSubmitting(false);
-      
-      // Reset form after 3 seconds
-      setTimeout(() => {
-        setSubmitSuccess(false);
-        setFormData({
-          name: '',
-          email: '',
-          phone: '',
-          reservation_date: '',
-          reservation_time: '',
-          guest_count: 2,
-          special_requests: ''
-        });
-      }, 3000);
-
     } catch (error) {
+      setSubmitError('Terjadi kesalahan. Pastikan semua data terisi dengan benar dan coba lagi.');
       console.error('Error submitting reservation:', error);
-      
-      // Show more specific error message
-      let errorMessage = 'Terjadi kesalahan saat membuat reservasi. Silakan coba lagi.';
-      
-      if (error.message) {
-        errorMessage = `Error: ${error.message}`;
-      }
-      
-      if (error.details) {
-        errorMessage += ` Details: ${error.details}`;
-      }
-      
-      setSubmitError(errorMessage);
+    } finally {
       setIsSubmitting(false);
     }
   };
 
-  return (
-    <section className="min-h-screen pt-24 pb-12 px-4 sm:px-6 lg:px-8 bg-gradient-to-b from-[#FFFBDE]/30 to-white relative overflow-hidden">
-      {/* Liquid glass background elements */}
-      <div className="fixed inset-0 overflow-hidden pointer-events-none">
-        {[...Array(8)].map((_, i) => (
-          <motion.div
-            key={i}
-            className="absolute rounded-full bg-[#90D1CA]/20 backdrop-blur-xl"
-            initial={{
-              width: `${Math.random() * 200 + 100}px`,
-              height: `${Math.random() * 200 + 100}px`,
-              top: `${Math.random() * 100}%`,
-              left: `${Math.random() * 100}%`,
-              opacity: 0.6
-            }}
-            animate={{
-              y: [0, -20, 0],
-              rotate: [0, Math.random() * 20 - 10],
-            }}
-            transition={{
-              duration: Math.random() * 10 + 10,
-              repeat: Infinity,
-              repeatType: 'reverse',
-              ease: 'easeInOut',
-              delay: i * 1.5
-            }}
-            style={{
-              filter: 'blur(40px)',
-            }}
-          />
-        ))}
-      </div>
-
-      <div className="relative z-10 max-w-6xl mx-auto">
-        {/* Header */}
-        <motion.div 
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6 }}
-          className="text-center mb-12"
-        >
-          <h1 className="text-4xl md:text-5xl font-extrabold text-teal-800 mb-4">
-            Reserve Your Table
-          </h1>
-          <p className="text-lg text-teal-600 max-w-2xl mx-auto">
-            Book your perfect coffee experience at Cafenity
-          </p>
-        </motion.div>
-
-        {/* Reservation Form */}
-        <motion.div
-          initial={{ opacity: 0, scale: 0.98 }}
-          animate={{ opacity: 1, scale: 1 }}
-          transition={{ duration: 0.5, delay: 0.2 }}
-          className="bg-white/30 backdrop-blur-lg border border-white/40 rounded-3xl overflow-hidden shadow-2xl p-6 sm:p-8 lg:p-10 max-w-3xl mx-auto"
-        >
-          {submitSuccess ? (
+  if (submitSuccess) {
+    return (
+        <section className="min-h-screen flex items-center justify-center pt-24 pb-12 px-4 sm:px-6 lg:px-8 bg-gradient-to-br from-teal-50/50 to-cyan-50/50">
             <motion.div
-              initial={{ opacity: 0, scale: 0.9 }}
-              animate={{ opacity: 1, scale: 1 }}
-              className="text-center py-12"
+                initial={{ opacity: 0, scale: 0.8 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ duration: 0.7, ease: 'easeOut' }}
+                className="text-center bg-white/50 backdrop-blur-2xl p-8 md:p-12 rounded-3xl shadow-2xl shadow-cyan-500/10 max-w-lg mx-auto"
             >
-              <div className="w-20 h-20 bg-teal-100 rounded-full flex items-center justify-center mx-auto mb-6">
-                <svg className="w-12 h-12 text-teal-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                </svg>
-              </div>
-              <h2 className="text-2xl font-bold text-teal-800 mb-2">Reservation Confirmed!</h2>
-              <p className="text-teal-600 mb-6">We've received your reservation request</p>
-              <p className="text-sm text-teal-500">Thank you for choosing Cafenity</p>
+                <div className="w-24 h-24 bg-gradient-to-br from-teal-400 to-cyan-500 rounded-full flex items-center justify-center mx-auto mb-6 shadow-lg shadow-cyan-500/30">
+                    <motion.svg
+                        className="w-16 h-16 text-white"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="2"
+                        viewBox="0 0 24 24"
+                    >
+                        <motion.path
+                            initial={{ pathLength: 0 }}
+                            animate={{ pathLength: 1 }}
+                            transition={{ duration: 0.8, delay: 0.2, ease: 'easeInOut' }}
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            d="M5 13l4 4L19 7"
+                        />
+                    </motion.svg>
+                </div>
+                <h2 className="text-3xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-teal-600 to-cyan-600 mb-3">
+                    Reservasi Berhasil!
+                </h2>
+                <p className="text-teal-700/80 mb-6 text-lg">
+                    Terima kasih, {formData.name}. Meja Anda telah kami siapkan.
+                </p>
+                <div className="text-left bg-teal-50/70 p-4 rounded-xl border border-teal-200/50 text-teal-800 space-y-2">
+                    <p><FiCalendar className="inline mr-2" /> <strong>Tanggal:</strong> {new Date(formData.reservation_date).toLocaleDateString('id-ID', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}</p>
+                    <p><FiClock className="inline mr-2" /> <strong>Waktu:</strong> {formData.reservation_time}</p>
+                    <p><FiUsers className="inline mr-2" /> <strong>Jumlah Tamu:</strong> {formData.guest_count} orang</p>
+                </div>
+                <p className="text-sm text-teal-500 mt-6">Sebuah email konfirmasi akan segera dikirimkan. Sampai jumpa!</p>
             </motion.div>
-          ) : (
-            <>
-              {/* Error Message */}
-              {submitError && (
+        </section>
+    );
+  }
+
+  return (
+    <section className="min-h-screen pt-32 pb-12 px-4 sm:px-6 lg:px-8 bg-gradient-to-br from-teal-50/50 to-cyan-50/50 overflow-hidden">
+        {/* Animated background blobs */}
+        <div className="absolute inset-0 z-0 pointer-events-none">
+            <motion.div className="absolute top-0 -left-24 w-72 h-72 bg-cyan-200/30 rounded-full filter blur-3xl opacity-50 animate-blob" />
+            <motion.div className="absolute top-1/2 -right-24 w-72 h-72 bg-teal-200/30 rounded-full filter blur-3xl opacity-50 animate-blob animation-delay-2000" />
+            <motion.div className="absolute bottom-0 left-1/4 w-72 h-72 bg-cyan-100/30 rounded-full filter blur-3xl opacity-50 animate-blob animation-delay-4000" />
+        </div>
+        
+        <div className="relative z-10 max-w-7xl mx-auto">
+            <motion.div 
+                className="text-center mb-12"
+                initial="hidden"
+                animate="visible"
+                variants={containerVariants}
+            >
+                <h1 className="text-4xl md:text-5xl lg:text-6xl font-extrabold text-teal-900/90 mb-4 tracking-tight">
+                    {"Pesan Tempat Anda".split(" ").map((word, i) => (
+                        <motion.span key={i} variants={itemVariants} className="inline-block mr-3">
+                            {word}
+                        </motion.span>
+                    ))}
+                </h1>
+                <motion.p variants={itemVariants} className="text-lg text-teal-700/80 max-w-2xl mx-auto">
+                    Amankan meja Anda untuk pengalaman ngopi terbaik di Cafenity.
+                </motion.p>
+            </motion.div>
+
+            <div className="grid lg:grid-cols-5 gap-12 items-start">
+                {/* Form Section */}
                 <motion.div
-                  initial={{ opacity: 0, y: -10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg"
+                    initial={{ opacity: 0, y: 50 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.7, delay: 0.3, ease: 'easeOut' }}
+                    className="lg:col-span-3 bg-white/40 backdrop-blur-xl border border-white/50 rounded-3xl shadow-2xl shadow-cyan-500/10 p-6 sm:p-8 lg:p-10"
                 >
-                  <span className="text-red-700 text-sm">
-                    {submitError}
-                  </span>
+                    <form onSubmit={handleSubmit} className="space-y-6">
+                        <motion.div variants={containerVariants} initial="hidden" animate="visible" className="grid gap-6 sm:grid-cols-2">
+                            {/* Input fields */}
+                            {[
+                                { name: 'name', type: 'text', placeholder: 'Nama Lengkap', icon: FiUser, required: true },
+                                { name: 'email', type: 'email', placeholder: 'Alamat Email', icon: FiMail, required: true },
+                                { name: 'phone', type: 'tel', placeholder: 'Nomor Telepon', icon: FiPhone, required: true },
+                            ].map(field => (
+                                <motion.div variants={itemVariants} key={field.name} className="relative">
+                                    <field.icon className="absolute top-1/2 left-4 -translate-y-1/2 text-teal-600/70" />
+                                    <input {...field} value={formData[field.name]} onChange={handleChange} className="pl-12 w-full bg-white/70 border-2 border-transparent focus:border-teal-400 focus:bg-white focus:ring-4 focus:ring-teal-500/20 rounded-xl py-3.5 px-4 text-teal-900 placeholder-teal-500/80 transition-all duration-300 outline-none"/>
+                                </motion.div>
+                            ))}
+
+                            {/* Guest Counter - Desain Baru yang Lebih Rapi */}
+                            <motion.div 
+                                variants={itemVariants} 
+                                className="bg-white/70 border-2 border-transparent rounded-xl flex items-center justify-between py-2.5 px-4 sm:col-span-2"
+                            >
+                                <div className="flex items-center">
+                                    <FiUsers className="text-teal-600/70 mr-4" />
+                                    <span className="text-teal-900 placeholder-teal-500/80">Jumlah Tamu</span>
+                                </div>
+                                <div className="flex items-center gap-3">
+                                    <button 
+                                        type="button" 
+                                        onClick={() => handleGuestChange(-1)} 
+                                        className="w-8 h-8 rounded-full bg-teal-100/80 text-teal-700 hover:bg-teal-200 transition-all flex items-center justify-center text-lg font-bold disabled:opacity-50 disabled:cursor-not-allowed" 
+                                        disabled={formData.guest_count <= 1}
+                                    >
+                                        <FiMinus />
+                                    </button>
+                                    <span className="text-lg font-bold text-teal-800 w-8 text-center">{formData.guest_count}</span>
+                                    <button 
+                                        type="button" 
+                                        onClick={() => handleGuestChange(1)} 
+                                        className="w-8 h-8 rounded-full bg-teal-100/80 text-teal-700 hover:bg-teal-200 transition-all flex items-center justify-center text-lg font-bold disabled:opacity-50 disabled:cursor-not-allowed" 
+                                        disabled={formData.guest_count >= 12}
+                                    >
+                                        <FiPlus />
+                                    </button>
+                                </div>
+                            </motion.div>
+
+                            {/* Date Field */}
+                            <motion.div variants={itemVariants} className="relative">
+                                <FiCalendar className="absolute top-1/2 left-4 -translate-y-1/2 text-teal-600/70" />
+                                <input type="date" name="reservation_date" value={formData.reservation_date} onChange={handleChange} required min={today} className="pl-12 w-full bg-white/70 border-2 border-transparent focus:border-teal-400 focus:bg-white focus:ring-4 focus:ring-teal-500/20 rounded-xl py-3.5 px-4 text-teal-900 placeholder-teal-500/80 transition-all duration-300 outline-none [color-scheme:light]"/>
+                            </motion.div>
+
+                            {/* Time Field */}
+                            <motion.div variants={itemVariants} className="relative">
+                                <FiClock className="absolute top-1/2 left-4 -translate-y-1/2 text-teal-600/70" />
+                                <select name="reservation_time" value={formData.reservation_time} onChange={handleChange} required className="pl-12 w-full bg-white/70 border-2 border-transparent focus:border-teal-400 focus:bg-white focus:ring-4 focus:ring-teal-500/20 rounded-xl py-3.5 px-4 text-teal-900 appearance-none transition-all duration-300 outline-none">
+                                    <option value="" disabled>Pilih Waktu</option>
+                                    {['08:00', '09:00', '10:00', '11:00', '12:00', '13:00', '14:00', '15:00', '16:00', '17:00', '18:00', '19:00', '20:00'].map(time => (<option key={time} value={time}>{time}</option>))}
+                                </select>
+                            </motion.div>
+                        </motion.div>
+
+                        {/* Special Request */}
+                        <motion.div variants={itemVariants}>
+                            <textarea name="special_requests" value={formData.special_requests} onChange={handleChange} rows={3} placeholder="Permintaan Khusus (opsional)" className="w-full bg-white/70 border-2 border-transparent focus:border-teal-400 focus:bg-white focus:ring-4 focus:ring-teal-500/20 rounded-xl py-3 px-4 text-teal-900 placeholder-teal-500/80 transition-all duration-300 outline-none resize-none"/>
+                        </motion.div>
+
+                        {/* Error Message */}
+                        <AnimatePresence>
+                            {submitError && (
+                                <motion.div
+                                    initial={{ opacity: 0, height: 0 }}
+                                    animate={{ opacity: 1, height: 'auto' }}
+                                    exit={{ opacity: 0, height: 0 }}
+                                    className="p-3 bg-red-100 border border-red-300 rounded-lg text-center text-red-800 text-sm"
+                                >
+                                    {submitError}
+                                </motion.div>
+                            )}
+                        </AnimatePresence>
+
+                        {/* Submit Button */}
+                        <motion.div variants={itemVariants}>
+                            <motion.button
+                                type="submit"
+                                disabled={isSubmitting}
+                                className="w-full py-4 px-6 rounded-xl font-bold text-lg text-white transition-all duration-300 flex items-center justify-center bg-gradient-to-r from-teal-500 to-cyan-600 disabled:opacity-60 disabled:cursor-not-allowed shadow-lg hover:shadow-xl hover:shadow-cyan-500/40"
+                                whileHover={{ scale: 1.03, y: -2 }}
+                                whileTap={{ scale: 0.98 }}
+                            >
+                                {isSubmitting ? (
+                                    <>
+                                        <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                                            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                        </svg>
+                                        Memproses...
+                                    </>
+                                ) : (
+                                    'Konfirmasi Reservasi'
+                                )}
+                            </motion.button>
+                        </motion.div>
+                    </form>
                 </motion.div>
-              )}
 
-              <form onSubmit={handleSubmit}>
-                <div className="grid gap-6 sm:grid-cols-2">
-                  {/* Name Field */}
-                  <div className="relative">
-                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                      <FiUser className="text-teal-600" />
+                {/* Info Card */}
+                <motion.div 
+                    initial={{ opacity: 0, y: 50 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.7, delay: 0.5, ease: 'easeOut' }}
+                    className="lg:col-span-2 space-y-8"
+                >
+                    <div className="bg-white/40 backdrop-blur-xl border border-white/50 rounded-3xl p-8">
+                         <h3 className="text-2xl font-bold text-teal-800 mb-4 flex items-center"><FiClock className="mr-3 text-teal-600"/> Jam Buka</h3>
+                         <ul className="space-y-2 text-teal-700/90">
+                            <li><strong>Senin - Jumat:</strong> 07:00 - 22:00</li>
+                            <li><strong>Sabtu - Minggu:</strong> 08:00 - 23:00</li>
+                         </ul>
                     </div>
-                    <input
-                      type="text"
-                      name="name"
-                      value={formData.name}
-                      onChange={handleChange}
-                      required
-                      placeholder="Full Name"
-                      className="pl-10 w-full bg-white/70 backdrop-blur-sm border border-white/50 focus:border-teal-300 focus:ring-2 focus:ring-teal-200 rounded-xl py-3 px-4 text-teal-900 placeholder-teal-400 transition-all duration-300"
-                    />
-                  </div>
-
-                  {/* Email Field */}
-                  <div className="relative">
-                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                      <FiMail className="text-teal-600" />
+                     <div className="bg-white/40 backdrop-blur-xl border border-white/50 rounded-3xl p-8">
+                         <h3 className="text-2xl font-bold text-teal-800 mb-4 flex items-center"><FiPhone className="mr-3 text-teal-600"/> Butuh Bantuan?</h3>
+                         <p className="text-teal-700/90">
+                            Untuk reservasi lebih dari 12 orang atau pertanyaan lainnya, silakan hubungi kami langsung di <strong className="text-teal-800">(021) 1234-5678</strong>.
+                         </p>
                     </div>
-                    <input
-                      type="email"
-                      name="email"
-                      value={formData.email}
-                      onChange={handleChange}
-                      required
-                      placeholder="Email Address"
-                      className="pl-10 w-full bg-white/70 backdrop-blur-sm border border-white/50 focus:border-teal-300 focus:ring-2 focus:ring-teal-200 rounded-xl py-3 px-4 text-teal-900 placeholder-teal-400 transition-all duration-300"
-                    />
-                  </div>
-
-                  {/* Phone Field */}
-                  <div className="relative">
-                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                      <FiPhone className="text-teal-600" />
-                    </div>
-                    <input
-                      type="tel"
-                      name="phone"
-                      value={formData.phone}
-                      onChange={handleChange}
-                      required
-                      placeholder="Phone Number"
-                      className="pl-10 w-full bg-white/70 backdrop-blur-sm border border-white/50 focus:border-teal-300 focus:ring-2 focus:ring-teal-200 rounded-xl py-3 px-4 text-teal-900 placeholder-teal-400 transition-all duration-300"
-                    />
-                  </div>
-
-                  {/* Guest Count Field */}
-                  <div className="relative">
-                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                      <FiUsers className="text-teal-600" />
-                    </div>
-                    <select
-                      name="guest_count"
-                      value={formData.guest_count}
-                      onChange={handleChange}
-                      className="pl-10 w-full bg-white/70 backdrop-blur-sm border border-white/50 focus:border-teal-300 focus:ring-2 focus:ring-teal-200 rounded-xl py-3 px-4 text-teal-900 appearance-none transition-all duration-300"
-                    >
-                      {[1, 2, 3, 4, 5, 6, 7, 8].map(num => (
-                        <option key={num} value={num}>{num} {num === 1 ? 'person' : 'people'}</option>
-                      ))}
-                      <option value="9">More than 8</option>
-                    </select>
-                  </div>
-
-                  {/* Date Field */}
-                  <div className="relative">
-                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                      <FiCalendar className="text-teal-600" />
-                    </div>
-                    <input
-                      type="date"
-                      name="reservation_date"
-                      value={formData.reservation_date}
-                      onChange={handleChange}
-                      required
-                      min={new Date().toISOString().split('T')[0]}
-                      className="pl-10 w-full bg-white/70 backdrop-blur-sm border border-white/50 focus:border-teal-300 focus:ring-2 focus:ring-teal-200 rounded-xl py-3 px-4 text-teal-900 placeholder-teal-400 transition-all duration-300"
-                    />
-                  </div>
-
-                  {/* Time Field */}
-                  <div className="relative">
-                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                      <FiClock className="text-teal-600" />
-                    </div>
-                    <select
-                      name="reservation_time"
-                      value={formData.reservation_time}
-                      onChange={handleChange}
-                      required
-                      className="pl-10 w-full bg-white/70 backdrop-blur-sm border border-white/50 focus:border-teal-300 focus:ring-2 focus:ring-teal-200 rounded-xl py-3 px-4 text-teal-900 appearance-none transition-all duration-300"
-                    >
-                      <option value="">Select Time</option>
-                      {['08:00', '09:00', '10:00', '11:00', '12:00', '13:00', '14:00', '15:00', '16:00', '17:00', '18:00', '19:00'].map(time => (
-                        <option key={time} value={time}>{time}</option>
-                      ))}
-                    </select>
-                  </div>
-                </div>
-
-                {/* Special Request */}
-                <div className="mt-6">
-                  <label htmlFor="special_requests" className="block text-sm font-medium text-teal-700 mb-2">
-                    Special Request (Optional)
-                  </label>
-                  <textarea
-                    name="special_requests"
-                    id="special_requests"
-                    value={formData.special_requests}
-                    onChange={handleChange}
-                    rows={3}
-                    placeholder="Allergies, special occasions, etc."
-                    className="w-full bg-white/70 backdrop-blur-sm border border-white/50 focus:border-teal-300 focus:ring-2 focus:ring-teal-200 rounded-xl py-3 px-4 text-teal-900 placeholder-teal-400 transition-all duration-300"
-                  />
-                </div>
-
-                {/* Submit Button */}
-                <div className="mt-8">
-                  <button
-                    type="submit"
-                    disabled={isSubmitting}
-                    className={`w-full py-4 px-6 rounded-xl font-bold text-lg transition-all duration-300 flex items-center justify-center text-white ${
-                      isSubmitting
-                        ? 'bg-teal-400 cursor-not-allowed'
-                        : 'bg-teal-600 hover:bg-teal-700 shadow-lg hover:shadow-xl'
-                    }`}
-                  >
-                    {isSubmitting ? (
-                      <>
-                          <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                          <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                          <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                        </svg>
-                        Processing...
-                      </>
-                    ) : (
-                      'Confirm Reservation'
-                    )}
-                  </button>
-                </div>
-              </form>
-            </>
-          )}
-        </motion.div>
-
-        {/* Additional Info */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5, delay: 0.4 }}
-          className="mt-12 text-center text-teal-700"
-        >
-          <p className="mb-2">For reservations of more than 8 people, please call us directly</p>
-          <p className="font-medium">Opening Hours: 7:00 AM - 10:00 PM (Daily)</p>
-        </motion.div>
-      </div>
+                </motion.div>
+            </div>
+        </div>
     </section>
   );
 }

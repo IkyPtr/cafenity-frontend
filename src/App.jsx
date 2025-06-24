@@ -15,7 +15,7 @@ const About = React.lazy(() => import("./Pages/AboutPage"));
 
 const MenuPage = React.lazy(() => import("./Pages/MenuPage"));
 
-const ReservationPage = React.lazy(() => import("./Pages/ReservationPage"));
+const ReservationPage = React.lazy(() => import("./pages/ReservationPage"));
 
 const Dashboard = React.lazy(() => import("./Pages/Admin/Dashboard"));
 
