@@ -18,38 +18,20 @@ const SidebarAdmin = () => {
         <ul className="space-y-3">
           <li>
             <NavLink to="/dashboard" className={menuClass}>
-              <AiOutlineHome className="mr-4 text-xl" />
-              Dashboard
-            </NavLink>
-          </li>
-          <li>
-            <NavLink to="/reservasiPesanan" className={menuClass}>
-              <AiOutlineHome className="mr-4 text-xl" />
-              Reservasi Pesanan
-            </NavLink>
-          </li>
-          <li>
-            <NavLink to="/admin/menu" className={menuClass}>
               <MdFastfood className="mr-4 text-xl" />
               Kelola Menu
             </NavLink>
           </li>
           <li>
-            <NavLink to="/admin/orders" className={menuClass}>
-              <AiOutlineShoppingCart className="mr-4 text-xl" />
-              Kelola Pesanan
+            <NavLink to="/reservasiPesanan" className={menuClass}>
+              <AiOutlineHome className="mr-4 text-xl" />
+              Kelola reservasi
             </NavLink>
           </li>
           <li>
-            <NavLink to="/admin/customers" className={menuClass}>
-              <FaUsers className="mr-4 text-xl" />
-              Data Pelanggan
-            </NavLink>
-          </li>
-          <li>
-            <NavLink to="/admin/settings" className={menuClass}>
-              <AiOutlineSetting className="mr-4 text-xl" />
-              Pengaturan
+            <NavLink to="/kontak" className={menuClass}>
+              <MdFastfood className="mr-4 text-xl" />
+              Kelola Kontak
             </NavLink>
           </li>
         </ul>

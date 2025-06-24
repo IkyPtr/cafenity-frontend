@@ -2,8 +2,7 @@ import React from "react";
 import "./assets/tailwind.css";
 import { Route, Routes } from "react-router-dom";
 import { Suspense } from "react";
-// import MenuPage from "./pages/MenuPage";
-// import ReservationPage from "./pages/ReservationPage";
+
 const CoffeeLoading = React.lazy(() => import("./components/CoffeeLoading"));
 
 const GuestLayout = React.lazy(() => import("./layouts/GuestLayout"));
@@ -24,6 +23,8 @@ const ReservasiPesanan = React.lazy(() => import("./Pages/Admin/ReservasiPesanan
 
 const AdminLayout = React.lazy(() => import("./layouts/AdminLayout"));
 
+const KelolaKontak = React.lazy(() => import("./Pages/Admin/KelolaKontak"));
+
 function App() {
   return (
     <Suspense fallback={<CoffeeLoading />}>
@@ -40,6 +41,7 @@ function App() {
         <Route element={<AdminLayout />}>
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/reservasiPesanan" element={<ReservasiPesanan />} />
+          <Route path="/kontak" element={<KelolaKontak />} />
         </Route>
       </Routes>
     </Suspense>
