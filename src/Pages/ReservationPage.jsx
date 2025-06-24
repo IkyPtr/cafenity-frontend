@@ -8,10 +8,10 @@ export default function ReservationPage() {
     name: '',
     email: '',
     phone: '',
-    date: '',
-    time: '',
-    guests: 2,
-    specialRequests: ''
+    reservation_date: '',
+    reservation_time: '',
+    guest_count: 2,
+    special_requests: ''
   });
 
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -31,26 +31,37 @@ export default function ReservationPage() {
     setIsSubmitting(true);
     setSubmitError('');
 
+    // Debug: Log form data
+    console.log('Form data being submitted:', formData);
+
     try {
+      const insertData = {
+        name: formData.name,
+        email: formData.email,
+        phone: formData.phone,
+        reservation_date: formData.reservation_date,
+        reservation_time: formData.reservation_time,
+        guest_count: parseInt(formData.guest_count),
+        special_requests: formData.special_requests || null
+      };
+
+      // Debug: Log insert data
+      console.log('Insert data:', insertData);
+
       const { data, error } = await supabase
         .from('reservations')
-        .insert([
-          {
-            name: formData.name,
-            email: formData.email,
-            phone: formData.phone,
-            reservation_date: formData.date,
-            reservation_time: formData.time,
-            guests: parseInt(formData.guests),
-            special_requests: formData.specialRequests,
-            status: 'pending',
-            created_at: new Date().toISOString()
-          }
-        ]);
+        .insert([insertData]);
 
-      if (error) throw error;
+      // Debug: Log response
+      console.log('Supabase response:', { data, error });
+
+      if (error) {
+        console.error('Supabase error details:', error);
+        throw error;
+      }
 
       setSubmitSuccess(true);
+      setIsSubmitting(false);
       
       // Reset form after 3 seconds
       setTimeout(() => {
@@ -59,16 +70,28 @@ export default function ReservationPage() {
           name: '',
           email: '',
           phone: '',
-          date: '',
-          time: '',
-          guests: 2,
-          specialRequests: ''
+          reservation_date: '',
+          reservation_time: '',
+          guest_count: 2,
+          special_requests: ''
         });
       }, 3000);
 
     } catch (error) {
       console.error('Error submitting reservation:', error);
-      setSubmitError('Terjadi kesalahan saat membuat reservasi. Silakan coba lagi.');
+      
+      // Show more specific error message
+      let errorMessage = 'Terjadi kesalahan saat membuat reservasi. Silakan coba lagi.';
+      
+      if (error.message) {
+        errorMessage = `Error: ${error.message}`;
+      }
+      
+      if (error.details) {
+        errorMessage += ` Details: ${error.details}`;
+      }
+      
+      setSubmitError(errorMessage);
       setIsSubmitting(false);
     }
   };
@@ -114,7 +137,7 @@ export default function ReservationPage() {
           transition={{ duration: 0.6 }}
           className="text-center mb-12"
         >
-                    <h1 className="text-4xl md:text-5xl font-extrabold text-teal-800 mb-4">
+          <h1 className="text-4xl md:text-5xl font-extrabold text-teal-800 mb-4">
             Reserve Your Table
           </h1>
           <p className="text-lg text-teal-600 max-w-2xl mx-auto">
@@ -141,7 +164,7 @@ export default function ReservationPage() {
                 </svg>
               </div>
               <h2 className="text-2xl font-bold text-teal-800 mb-2">Reservation Confirmed!</h2>
-              <p className="text-teal-600 mb-6">We've sent the details to your email</p>
+              <p className="text-teal-600 mb-6">We've received your reservation request</p>
               <p className="text-sm text-teal-500">Thank you for choosing Cafenity</p>
             </motion.div>
           ) : (
@@ -153,7 +176,7 @@ export default function ReservationPage() {
                   animate={{ opacity: 1, y: 0 }}
                   className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg"
                 >
-                  <span className="text-red-700">
+                  <span className="text-red-700 text-sm">
                     {submitError}
                   </span>
                 </motion.div>
@@ -209,14 +232,14 @@ export default function ReservationPage() {
                     />
                   </div>
 
-                  {/* Guests Field */}
+                  {/* Guest Count Field */}
                   <div className="relative">
                     <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                       <FiUsers className="text-teal-600" />
                     </div>
                     <select
-                      name="guests"
-                      value={formData.guests}
+                      name="guest_count"
+                      value={formData.guest_count}
                       onChange={handleChange}
                       className="pl-10 w-full bg-white/70 backdrop-blur-sm border border-white/50 focus:border-teal-300 focus:ring-2 focus:ring-teal-200 rounded-xl py-3 px-4 text-teal-900 appearance-none transition-all duration-300"
                     >
@@ -234,8 +257,8 @@ export default function ReservationPage() {
                     </div>
                     <input
                       type="date"
-                      name="date"
-                      value={formData.date}
+                      name="reservation_date"
+                      value={formData.reservation_date}
                       onChange={handleChange}
                       required
                       min={new Date().toISOString().split('T')[0]}
@@ -249,8 +272,8 @@ export default function ReservationPage() {
                       <FiClock className="text-teal-600" />
                     </div>
                     <select
-                      name="time"
-                      value={formData.time}
+                      name="reservation_time"
+                      value={formData.reservation_time}
                       onChange={handleChange}
                       required
                       className="pl-10 w-full bg-white/70 backdrop-blur-sm border border-white/50 focus:border-teal-300 focus:ring-2 focus:ring-teal-200 rounded-xl py-3 px-4 text-teal-900 appearance-none transition-all duration-300"
@@ -263,15 +286,15 @@ export default function ReservationPage() {
                   </div>
                 </div>
 
-                {/* Special Requests */}
+                {/* Special Request */}
                 <div className="mt-6">
-                  <label htmlFor="specialRequests" className="block text-sm font-medium text-teal-700 mb-2">
-                    Special Requests (Optional)
+                  <label htmlFor="special_requests" className="block text-sm font-medium text-teal-700 mb-2">
+                    Special Request (Optional)
                   </label>
                   <textarea
-                    name="specialRequests"
-                    id="specialRequests"
-                    value={formData.specialRequests}
+                    name="special_requests"
+                    id="special_requests"
+                    value={formData.special_requests}
                     onChange={handleChange}
                     rows={3}
                     placeholder="Allergies, special occasions, etc."
@@ -292,7 +315,7 @@ export default function ReservationPage() {
                   >
                     {isSubmitting ? (
                       <>
-                        <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                          <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                           <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
                           <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                         </svg>
@@ -322,4 +345,3 @@ export default function ReservationPage() {
     </section>
   );
 }
-
