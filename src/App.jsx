@@ -25,9 +25,12 @@ const AdminLayout = React.lazy(() => import("./layouts/AdminLayout"));
 
 const KelolaKontak = React.lazy(() => import("./Pages/Admin/KelolaKontak"));
 
+const CursorFollower = React.lazy(() => import("./components/CursorFollower"));
+
 function App() {
   return (
     <Suspense fallback={<CoffeeLoading />}>
+      <CursorFollower />
       <Routes>
         <Route element={<GuestLayout />}>
           <Route path="/" element={<HomeGuest />} />

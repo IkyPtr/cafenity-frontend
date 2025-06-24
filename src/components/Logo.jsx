@@ -66,23 +66,7 @@ export default function Logo() {
         className="flex items-baseline relative z-10"
         animate={controls}
       >
-        {/* Titik Uap Sebelum Logo */}
-        <div className="relative mr-2 flex items-center">
-          {[0, 1, 2].map((i) => (
-            <motion.div
-              key={i}
-              className="w-1 h-3 rounded-sm absolute"
-              initial={{ y: 0, opacity: 0.8 }}
-              animate={steamControls}
-              custom={i}
-              style={{
-                background: "linear-gradient(135deg, #06b6d4, #10b981)",
-                left: `${i * 4}px`,
-                borderRadius: "2px", // agar bentuknya lebih seperti batang uap, bukan bulat
-              }}
-            />
-          ))}
-        </div>
+
 
         {/* Main Logo Text */}
         <motion.h1 
