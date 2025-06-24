@@ -32,9 +32,9 @@ export default function Navbar() {
     <header
       className={`fixed top-0 left-0 w-full z-50 transition-all duration-300 ${
         isDarkTheme
-          ? "bg-teal-950/80 text-white"
-          : "bg-yellow-50/80 text-teal-900"
-      } ${scrolled ? "shadow-lg backdrop-blur-xl border-b border-teal-300/20" : ""}`}
+          ? "bg-cyan-900/80 text-white"
+          : "bg-cyan-50/80 text-cyan-900"
+      } ${scrolled ? "shadow-lg backdrop-blur-xl border-b border-cyan-300/20" : ""}`}
     >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex justify-between items-center">
         <Logo />
@@ -47,15 +47,15 @@ export default function Navbar() {
               to={link.to}
               className={`${linkBaseStyle} ${
                 isDarkTheme
-                  ? "text-white hover:text-teal-200"
-                  : "text-teal-900 hover:text-white"
+                  ? "text-white hover:text-cyan-200"
+                  : "text-cyan-800 hover:text-white"
               }`}
             >
               <span
                 className={`${hoverLayer} ${
                   isDarkTheme
-                    ? "bg-white/10"
-                    : "bg-teal-500/20"
+                    ? "bg-cyan-500/20"
+                    : "bg-cyan-500/30"
                 }`}
               ></span>
               <span className="relative z-10">{link.name}</span>
@@ -65,13 +65,13 @@ export default function Navbar() {
             onClick={toggleTheme}
             className={`${linkBaseStyle} ${
               isDarkTheme
-                ? "bg-white/10 text-white hover:bg-white/20"
-                : "bg-teal-200 text-teal-900 hover:bg-teal-300"
+                ? "bg-cyan-700 text-white hover:bg-cyan-600"
+                : "bg-cyan-200 text-cyan-800 hover:bg-cyan-300"
             }`}
           >
             <span
               className={`${hoverLayer} ${
-                isDarkTheme ? "bg-white/20" : "bg-white/30"
+                isDarkTheme ? "bg-cyan-600/30" : "bg-white/30"
               }`}
             ></span>
             <span className="relative z-10">
@@ -84,7 +84,9 @@ export default function Navbar() {
         <div className="md:hidden">
           <button
             onClick={() => setIsOpen(!isOpen)}
-            className="text-2xl focus:outline-none transition"
+            className={`text-2xl focus:outline-none transition ${
+              isDarkTheme ? "text-white" : "text-cyan-800"
+            }`}
           >
             {isOpen ? <FiX /> : <FiMenu />}
           </button>
@@ -95,7 +97,7 @@ export default function Navbar() {
       <div
         className={`md:hidden transition-all duration-300 overflow-hidden ${
           isOpen ? "max-h-[500px] opacity-100 py-4" : "max-h-0 opacity-0 py-0"
-        } ${isDarkTheme ? "bg-teal-950/90 text-white" : "bg-white text-teal-900"} px-6`}
+        } ${isDarkTheme ? "bg-cyan-900/90 text-white" : "bg-cyan-50 text-cyan-900"} px-6`}
       >
         <div className="flex flex-col gap-3">
           {navLinks.map((link) => (
@@ -105,15 +107,15 @@ export default function Navbar() {
               onClick={() => setIsOpen(false)}
               className={`${linkBaseStyle} ${
                 isDarkTheme
-                  ? "text-white hover:text-teal-200"
-                  : "text-teal-900 hover:text-white"
+                  ? "text-white hover:text-cyan-200"
+                  : "text-cyan-800 hover:text-white"
               }`}
             >
               <span
                 className={`${hoverLayer} ${
                   isDarkTheme
-                    ? "bg-white/10"
-                    : "bg-teal-500/20"
+                    ? "bg-cyan-500/20"
+                    : "bg-cyan-500/30"
                 }`}
               ></span>
               <span className="relative z-10">{link.name}</span>
@@ -126,13 +128,13 @@ export default function Navbar() {
             }}
             className={`${linkBaseStyle} w-full text-center ${
               isDarkTheme
-                ? "bg-white/10 text-white hover:bg-white/20"
-                : "bg-teal-200 text-teal-900 hover:bg-teal-300"
+                ? "bg-cyan-700 text-white hover:bg-cyan-600"
+                : "bg-cyan-200 text-cyan-800 hover:bg-cyan-300"
             }`}
           >
             <span
               className={`${hoverLayer} ${
-                isDarkTheme ? "bg-white/20" : "bg-white/30"
+                isDarkTheme ? "bg-cyan-600/30" : "bg-white/30"
               }`}
             ></span>
             <span className="relative z-10">
