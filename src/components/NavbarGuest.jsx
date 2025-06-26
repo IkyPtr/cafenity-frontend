@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { FiMenu, FiX } from "react-icons/fi";
 import Logo from "./Logo";
+import ThemeButton from "./ThemeButton";
 
 export default function Navbar() {
   const [isDarkTheme, setIsDarkTheme] = useState(false);
@@ -53,31 +54,22 @@ export default function Navbar() {
             >
               <span
                 className={`${hoverLayer} ${
-                  isDarkTheme
-                    ? "bg-cyan-500/20"
-                    : "bg-cyan-500/30"
+                  isDarkTheme ? "bg-cyan-500/20" : "bg-cyan-500/30"
                 }`}
               ></span>
               <span className="relative z-10">{link.name}</span>
             </Link>
           ))}
-          <button
-            onClick={toggleTheme}
-            className={`${linkBaseStyle} ${
-              isDarkTheme
-                ? "bg-cyan-700 text-white hover:bg-cyan-600"
-                : "bg-cyan-200 text-cyan-800 hover:bg-cyan-300"
-            }`}
-          >
-            <span
-              className={`${hoverLayer} ${
-                isDarkTheme ? "bg-cyan-600/30" : "bg-white/30"
-              }`}
-            ></span>
-            <span className="relative z-10">
-              {isDarkTheme ? "Light Mode" : "Dark Mode"}
-            </span>
-          </button>
+
+          {/* Tombol Ganti Tema dengan ukuran sejajar */}
+          <div className="flex items-center">
+            <div className="w-[56px] h-[36px]">
+              <ThemeButton
+                isDark={isDarkTheme}
+                toggleTheme={toggleTheme}
+              />
+            </div>
+          </div>
         </nav>
 
         {/* Mobile Menu Button */}
@@ -113,34 +105,25 @@ export default function Navbar() {
             >
               <span
                 className={`${hoverLayer} ${
-                  isDarkTheme
-                    ? "bg-cyan-500/20"
-                    : "bg-cyan-500/30"
+                  isDarkTheme ? "bg-cyan-500/20" : "bg-cyan-500/30"
                 }`}
               ></span>
               <span className="relative z-10">{link.name}</span>
             </Link>
           ))}
-          <button
-            onClick={() => {
-              toggleTheme();
-              setIsOpen(false);
-            }}
-            className={`${linkBaseStyle} w-full text-center ${
-              isDarkTheme
-                ? "bg-cyan-700 text-white hover:bg-cyan-600"
-                : "bg-cyan-200 text-cyan-800 hover:bg-cyan-300"
-            }`}
-          >
-            <span
-              className={`${hoverLayer} ${
-                isDarkTheme ? "bg-cyan-600/30" : "bg-white/30"
-              }`}
-            ></span>
-            <span className="relative z-10">
-              {isDarkTheme ? "Switch to Light" : "Switch to Dark"}
-            </span>
-          </button>
+
+          {/* Tombol Ganti Tema Mobile */}
+          <div className="flex justify-center">
+            <div className="w-[56px] h-[36px]">
+              <ThemeButton
+                isDark={isDarkTheme}
+                toggleTheme={() => {
+                  toggleTheme();
+                  setIsOpen(false);
+                }}
+              />
+            </div>
+          </div>
         </div>
       </div>
     </header>

@@ -17,13 +17,13 @@ const MenuPage = React.lazy(() => import("./Pages/MenuPage"));
 
 const ReservationPage = React.lazy(() => import("./pages/ReservationPage"));
 
-const Dashboard = React.lazy(() => import("./Pages/Admin/Dashboard"));
+const Dashboard = React.lazy(() => import("./pages/Admin/Dashboard"));
 
 const ReservasiPesanan = React.lazy(() => import("./Pages/Admin/ReservasiPesanan"));
 
 const AdminLayout = React.lazy(() => import("./layouts/AdminLayout"));
 
-const KelolaKontak = React.lazy(() => import("./Pages/Admin/KelolaKontak"));
+const KelolaKontak = React.lazy(() => import("./pages/Admin/KelolaKontak"));
 
 const CursorFollower = React.lazy(() => import("./components/CursorFollower"));
 
@@ -36,6 +36,7 @@ function App() {
     <Suspense fallback={<CoffeeLoading />}>
       <CursorFollower />
       <Routes>
+        {/* Guest Layout */}
         <Route element={<GuestLayout />}>
           <Route path="/" element={<HomeGuest />} />
           <Route path="/menu" element={<MenuPage />} />
@@ -43,8 +44,8 @@ function App() {
           <Route path="/contact" element={<Contact />} />
           <Route path="/about" element={<About />} />
         </Route>
-      </Routes>
-      <Routes>
+
+        {/* Admin Layout */}
         <Route element={<AdminLayout />}>
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/reservasiPesanan" element={<ReservasiPesanan />} />
@@ -57,5 +58,4 @@ function App() {
     </Suspense>
   );
 }
-
 export default App;

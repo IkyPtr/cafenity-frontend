@@ -1,64 +1,84 @@
-import React from "react";
-import {
-  AiOutlineSearch,
-  AiOutlineCopy,
-  AiOutlineLink,
-  AiOutlineStar,
-  AiOutlineBell,
-} from "react-icons/ai";
-import { BsMoon } from "react-icons/bs";
+// HeaderAdmin.jsx
+import React, { useState } from "react";
+import { FiSearch, FiBell, FiSun, FiMoon, FiUser } from "react-icons/fi";
+import { motion } from "framer-motion";
 
 const HeaderAdmin = () => {
+  const [darkMode, setDarkMode] = useState(false);
+  const [searchFocused, setSearchFocused] = useState(false);
+
   return (
-    <header className="bg-white shadow p-4 flex justify-between items-center">
+    <motion.header 
+      initial={{ y: -10, opacity: 0 }}
+      animate={{ y: 0, opacity: 1 }}
+      transition={{ duration: 0.3 }}
+      className="bg-white/80 backdrop-blur-lg shadow-sm p-4 flex justify-between items-center border-b border-cyan-200/40"
+    >
       {/* Search Box */}
-      <div className="flex items-center w-1/3">
-        <div className="relative w-full">
-          <input
-            type="text"
-            placeholder="Search Here..."
-            className="w-full pl-4 pr-10 py-2 rounded-full border border-gray-300 focus:outline-none bg-[#f5f5f5]"
-          />
-          <AiOutlineSearch className="absolute right-3 top-2.5 text-gray-400" />
-        </div>
-      </div>
+      <motion.div 
+        animate={{
+          width: searchFocused ? "400px" : "300px"
+        }}
+        transition={{ type: "spring", stiffness: 300 }}
+        className="relative"
+      >
+        <input
+          type="text"
+          placeholder="Cari menu, pelanggan..."
+          className="w-full pl-10 pr-4 py-2 rounded-full border border-cyan-300/50 focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500/30 bg-white/90 transition-all"
+          onFocus={() => setSearchFocused(true)}
+          onBlur={() => setSearchFocused(false)}
+        />
+        <FiSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-cyan-500" />
+      </motion.div>
 
-      {/* Icon Section */}
-      <div className="flex items-center gap-3">
-        <div className="bg-gray-100 p-2 rounded-full">
-          <AiOutlineCopy className="text-purple-500 text-lg" />
-        </div>
-        <div className="bg-gray-100 p-2 rounded-full">
-          <AiOutlineLink className="text-purple-500 text-lg" />
-        </div>
-        <div className="bg-gray-100 p-2 rounded-full">
-          <AiOutlineStar className="text-purple-500 text-lg" />
-        </div>
-        <div className="bg-gray-100 p-2 rounded-full">
-          <BsMoon className="text-purple-500 text-lg" />
-        </div>
+      {/* Right Side Icons */}
+      <div className="flex items-center gap-4">
+        {/* Dark Mode Toggle */}
+        <motion.button
+          whileHover={{ scale: 1.1 }}
+          whileTap={{ scale: 0.9 }}
+          onClick={() => setDarkMode(!darkMode)}
+          className="p-2 rounded-full bg-cyan-100/50 text-cyan-600 hover:bg-cyan-100 transition-colors"
+        >
+          {darkMode ? <FiSun /> : <FiMoon />}
+        </motion.button>
 
-        <div className="relative bg-gray-100 p-2 rounded-full">
-          <AiOutlineBell className="text-blue-500 text-lg" />
-          <span className="absolute -top-1 -right-1 bg-blue-500 text-white text-xs font-bold rounded-full px-1">
-            5
-          </span>
-        </div>
+        {/* Notifications */}
+        <motion.div 
+          whileHover={{ scale: 1.05 }}
+          className="relative p-2"
+        >
+          <FiBell className="text-cyan-600 text-lg" />
+          <motion.span 
+            initial={{ scale: 0 }}
+            animate={{ scale: 1 }}
+            className="absolute top-0 right-0 bg-rose-500 text-white text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center shadow-sm"
+          >
+            3
+          </motion.span>
+        </motion.div>
 
-        {/* User Info */}
-        <div className="flex items-center gap-2 ml-2">
-          <img
-            src="https://i.pravatar.cc/40"
-            alt="User"
-            className="w-10 h-10 rounded-full"
-          />
-          <div className="flex flex-col text-sm">
-            <span className="font-semibold">Cafenity</span>
-            <span className="text-gray-400">UI Designer</span>
+        {/* User Profile */}
+        <motion.div
+          whileHover={{ scale: 1.02 }}
+          className="flex items-center gap-2 pl-2 border-l border-cyan-200/40"
+        >
+          <div className="relative">
+            <img
+              src="https://i.pravatar.cc/40"
+              alt="Admin"
+              className="w-9 h-9 rounded-full border-2 border-cyan-500/30"
+            />
+            <div className="absolute bottom-0 right-0 w-3 h-3 bg-teal-400 rounded-full border-2 border-white"></div>
           </div>
-        </div>
+          <div className="hidden md:flex flex-col">
+            <span className="text-sm font-medium text-cyan-900">Admin Cafenity</span>
+            <span className="text-xs text-cyan-600/80">Super Admin</span>
+          </div>
+        </motion.div>
       </div>
-    </header>
+    </motion.header>
   );
 };
 
