@@ -110,7 +110,7 @@ const AboutHero = () => {
                 className="font-bold text-lg font-poppins"
                 style={{ color: "var(--color-cafenity-primary)" }}
               >
-                10,000+ Pelanggan
+                10,000++ Pelanggan
               </span>
             </motion.div>
             <motion.div
