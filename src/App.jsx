@@ -27,6 +27,10 @@ const KelolaKontak = React.lazy(() => import("./Pages/Admin/KelolaKontak"));
 
 const CursorFollower = React.lazy(() => import("./components/CursorFollower"));
 
+const Register = React.lazy(() =>import("./Pages/Users/Register"));
+
+const Login = React.lazy(()  => import("./Pages/Users/Login"));
+
 function App() {
   return (
     <Suspense fallback={<CoffeeLoading />}>
@@ -45,8 +49,11 @@ function App() {
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/reservasiPesanan" element={<ReservasiPesanan />} />
           <Route path="/kontak" element={<KelolaKontak />} />
+          <Route path="/Registrasi" element={<Register/>}/>
+          <Route path="/login" element={<Login/>}/>
         </Route>
       </Routes>
+
     </Suspense>
   );
 }
