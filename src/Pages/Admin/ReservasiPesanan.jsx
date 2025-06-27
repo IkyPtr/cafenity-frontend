@@ -124,7 +124,7 @@ export default function ReservasiPesanan() {
             <p className="text-sm sm:text-base text-gray-500 mt-1">Home/Dashboard / Reservasi & Pesanan</p>
           </div>
 
-          {/* Stats Grid */}
+          Stats Grid
           <div id="dashboard-grid" className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 mb-6 sm:mb-8">
             <div className="flex items-center space-x-3 sm:space-x-4 bg-white rounded-lg shadow-md p-3 sm:p-4 hover:shadow-lg transition-shadow">
               <div className="bg-green-500 rounded-full p-2 sm:p-3 text-white flex-shrink-0">
