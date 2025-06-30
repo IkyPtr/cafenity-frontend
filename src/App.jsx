@@ -19,7 +19,7 @@ const ReservationPage = React.lazy(() => import("./pages/ReservationPage"));
 
 const Dashboard = React.lazy(() => import("./pages/Admin/Dashboard"));
 
-const ReservasiPesanan = React.lazy(() => import("./Pages/Admin/ReservasiPesanan"));
+const ReservasiPesanan = React.lazy(() => import("./pages/Admin/ReservasiPesanan"));
 
 const AdminLayout = React.lazy(() => import("./layouts/AdminLayout"));
 
