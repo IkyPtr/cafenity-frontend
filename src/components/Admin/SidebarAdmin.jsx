@@ -1,67 +1,137 @@
-import React from "react";
-import { NavLink } from "react-router-dom";
-import { FiCoffee, FiCalendar, FiMail } from "react-icons/fi";
+import { useNavigate } from "react-router-dom";
+import { FiLogOut, FiHome, FiUsers, FiBookOpen, FiUser } from "react-icons/fi";
+import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import Logo from "../Logo";
 
-const SidebarAdmin = () => {
-  const menuClass = ({ isActive }) =>
-    isActive
-      ? "flex items-center p-3 rounded-lg bg-cyan-600/10 text-cyan-600 border-l-4 border-cyan-500 shadow-cyan-100 shadow-inner"
-      : "flex items-center p-3 rounded-lg text-cyan-800/80 hover:bg-cyan-500/10 hover:text-cyan-600 transition-all";
+export default function SidebarAdmin() {
+  const navigate = useNavigate();
+  const [adminData, setAdminData] = useState(null);
+  const [activeItem, setActiveItem] = useState("");
+
+  useEffect(() => {
+    const data = JSON.parse(localStorage.getItem("adminData"));
+    if (data) {
+      setAdminData(data);
+      const path = window.location.pathname;
+      if (path.includes("reservasi")) setActiveItem("reservasi");
+      else if (path.includes("kontak")) setActiveItem("kontak");
+      else setActiveItem("dashboard");
+    }
+  }, []);
+
+  const handleLogout = () => {
+    localStorage.removeItem("isAdminLoggedIn");
+    localStorage.removeItem("adminData");
+    localStorage.removeItem("loginTime");
+    navigate("/login");
+  };
 
   const menuItems = [
-    { path: "/dashboard", icon: <FiCoffee className="text-lg" />, label: "Kelola Menu" },
-    { path: "/reservasiPesanan", icon: <FiCalendar className="text-lg" />, label: "Kelola Reservasi" },
-    { path: "/kontak", icon: <FiMail className="text-lg" />, label: "Kelola Kontak" }
+    {
+      id: "dashboard",
+      icon: <FiHome className="text-lg" />,
+      label: "Dashboard",
+      path: "/dashboard",
+    },
+    {
+      id: "reservasi",
+      icon: <FiBookOpen className="text-lg" />,
+      label: "Reservasi",
+      path: "/reservasiPesanan",
+    },
+    {
+      id: "kontak",
+      icon: <FiUsers className="text-lg" />,
+      label: "Kelola Kontak",
+      path: "/kontak",
+    },
   ];
 
   return (
-    <motion.aside 
+    <motion.div
       initial={{ x: -20, opacity: 0 }}
       animate={{ x: 0, opacity: 1 }}
-      transition={{ duration: 0.4 }}
-      className="w-64 bg-gradient-to-b from-white to-cyan-50 flex flex-col p-5 border-r border-cyan-200/50"
+      transition={{ duration: 0.3 }}
+      className="h-screen w-64 bg-gradient-to-b from-[#f0f8ff] to-[#e0f7fa] flex flex-col border-r border-cyan-200/50"
     >
-      <div className="mb-10 pl-2">
-        <Logo />
-      </div>
-      
-      <nav className="flex-1">
-        <ul className="space-y-1">
-          {menuItems.map((item, index) => (
-            <motion.li
-              key={index}
-              whileHover={{ x: 5 }}
-              transition={{ type: "spring", stiffness: 300 }}
-            >
-              <NavLink to={item.path} className={menuClass}>
-                <span className="mr-3">{item.icon}</span>
-                <span className="font-medium">{item.label}</span>
-              </NavLink>
-            </motion.li>
-          ))}
-        </ul>
-      </nav>
-
-      <div className="mt-auto pt-4 border-t border-cyan-200/30">
-        <div className="flex items-center p-3 rounded-lg hover:bg-cyan-100/30 transition-colors">
-          <div className="relative mr-3">
-            <img 
-              src="https://i.pravatar.cc/40" 
-              alt="Admin" 
-              className="w-8 h-8 rounded-full border-2 border-cyan-400/30" 
-            />
-            <div className="absolute bottom-0 right-0 w-2.5 h-2.5 bg-teal-400 rounded-full border border-white"></div>
-          </div>
-          <div>
-            <p className="text-sm font-medium text-cyan-900">Admin Cafenity</p>
-            <p className="text-xs text-cyan-600/60">Super Admin</p>
-          </div>
+      {/* Logo */}
+      <div className="p-4 border-b border-cyan-200/30">
+        <div className="flex items-center justify-center px-4">
+          <Logo />
         </div>
       </div>
-    </motion.aside>
-  );
-};
 
-export default SidebarAdmin;
+      {/* Menu Items */}
+      <nav className="flex-1 p-4 space-y-1 overflow-y-auto">
+        {menuItems.map((item) => (
+          <motion.button
+            key={item.id}
+            whileHover={{ x: 5 }}
+            whileTap={{ scale: 0.98 }}
+            onClick={() => {
+              navigate(item.path);
+              setActiveItem(item.id);
+            }}
+            className={`w-full flex items-center rounded-lg p-3 transition-all ${
+              activeItem === item.id
+                ? "bg-cyan-100 text-cyan-700 shadow-inner"
+                : "text-cyan-800/80 hover:bg-cyan-50"
+            }`}
+          >
+            <div className={`${activeItem === item.id ? "text-cyan-600" : "text-cyan-500"}`}>
+              {item.icon}
+            </div>
+            <motion.span
+              initial={{ opacity: 0, x: -10 }}
+              animate={{ opacity: 1, x: 0 }}
+              className="ml-3 font-medium"
+            >
+              {item.label}
+            </motion.span>
+          </motion.button>
+        ))}
+      </nav>
+
+      {/* User Profile & Logout */}
+      <div className="p-4 border-t border-cyan-200/30">
+        <div className="flex items-center justify-between mb-3 p-2 rounded-lg bg-cyan-50/50">
+          <div className="flex items-center">
+            <div className="relative">
+              <div className="w-8 h-8 rounded-full bg-cyan-100 flex items-center justify-center">
+                <FiUser className="text-cyan-600" />
+              </div>
+              <div className="absolute bottom-0 right-0 w-2 h-2 bg-teal-400 rounded-full border border-white"></div>
+            </div>
+            <motion.div
+              initial={{ opacity: 0, x: -10 }}
+              animate={{ opacity: 1, x: 0 }}
+              className="ml-3"
+            >
+              <p className="text-sm font-medium text-cyan-900 truncate max-w-[120px]">
+                {adminData?.nama_lengkap || "Admin"}
+              </p>
+              <p className="text-xs text-cyan-600/60">Administrator</p>
+            </motion.div>
+          </div>
+        </div>
+
+        <motion.button
+          whileHover={{ scale: 1.02 }}
+          whileTap={{ scale: 0.95 }}
+          onClick={handleLogout}
+          className="w-full flex items-center justify-center p-2 rounded-lg bg-rose-50 text-rose-600 hover:bg-rose-100 transition px-4"
+        >
+          <FiLogOut />
+          <motion.span
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            className="ml-2 text-sm"
+          >
+            Logout
+          </motion.span>
+        </motion.button>
+      </div>
+    </motion.div>
+  );
+}

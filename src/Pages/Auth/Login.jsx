@@ -51,75 +51,64 @@ export default function Login() {
   };
 
   const handleSubmit = async (e) => {
-    e.preventDefault();
-    
-    if (!validateForm()) {
+  e.preventDefault();
+
+  if (!validateForm()) {
+    return;
+  }
+
+  if (loginAttempts >= 5) {
+    setErrors({
+      general: 'Terlalu banyak percobaan login. Silakan tunggu beberapa menit.'
+    });
+    return;
+  }
+
+  setIsLoading(true);
+  setErrors({});
+  setSuccessMessage('');
+
+  try {
+    const username = formData.username.trim();
+    const password = formData.password;
+
+    const { data: adminData, error } = await supabase
+      .from('admin')
+      .select('*')
+      .eq('username', username)
+      .eq('password', password)
+      .single();
+
+    if (error || !adminData) {
+      setLoginAttempts(prev => prev + 1);
+      setErrors({ general: 'Username atau password salah. Silakan coba lagi.' });
       return;
     }
 
-    if (loginAttempts >= 5) {
-      setErrors({ 
-        general: 'Terlalu banyak percobaan login. Silakan tunggu beberapa menit.' 
-      });
-      return;
-    }
+    // Login sukses
+    localStorage.setItem('adminData', JSON.stringify(adminData));
+    localStorage.setItem('isAdminLoggedIn', 'true');
+    localStorage.setItem('loginTime', new Date().toISOString());
 
-    setIsLoading(true);
-    setErrors({});
-    setSuccessMessage('');
+    setLoginAttempts(0);
+    setSuccessMessage(`Selamat datang, ${adminData.nama_lengkap}! Mengalihkan ke dashboard...`);
 
-    try {
-      const { data, error } = await supabase
-        .from('admin')
-        .select('id, nama_lengkap, email, username, no_hp, created_at')
-        .eq('username', formData.username.trim())
-        .eq('password', formData.password)
-        .single();
+    setFormData({ username: '', password: '' });
 
-      if (error) {
-        if (error.code === 'PGRST116') {
-          setLoginAttempts(prev => prev + 1);
-          setErrors({ 
-            general: 'Username atau password salah. Silakan coba lagi.' 
-          });
-        } else {
-          console.error('Database error:', error);
-          setErrors({ 
-            general: 'Terjadi kesalahan sistem. Silakan coba lagi.' 
-          });
-        }
-        return;
-      }
+    setTimeout(() => {
+      window.location.href = '/dashboard';
+    }, 2000);
 
-      // Login berhasil
-      console.log('Login berhasil:', data);
-      
-      localStorage.setItem('adminData', JSON.stringify(data));
-      localStorage.setItem('isAdminLoggedIn', 'true');
-      localStorage.setItem('loginTime', new Date().toISOString());
+  } catch (error) {
+    console.error('Login error:', error);
+    setErrors({
+      general: 'Terjadi kesalahan saat login. Silakan coba lagi.'
+    });
+  } finally {
+    setIsLoading(false);
+  }
+};
 
-      setLoginAttempts(0);
-      setSuccessMessage(`Selamat datang, ${data.nama_lengkap}! Mengalihkan ke dashboard...`);
-      
-      setFormData({
-        username: '',
-        password: ''
-      });
-
-      // Redirect ke dashboard setelah 2 detik
-      setTimeout(() => {
-        window.location.href = '/dashboard';
-      }, 2000);
-
-    } catch (error) {
-      console.error('Login error:', error);
-      setErrors({ 
-        general: 'Terjadi kesalahan saat login. Silakan coba lagi.' 
-      });
-    } finally {
-      setIsLoading(false);
-    }
-  };
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-[#f0f8ff] to-[#e0f7fa] py-12 px-4 sm:px-6 lg:px-8">

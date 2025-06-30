@@ -44,39 +44,7 @@ const HeaderAdmin = () => {
           {darkMode ? <FiSun /> : <FiMoon />}
         </motion.button>
 
-        {/* Notifications */}
-        <motion.div 
-          whileHover={{ scale: 1.05 }}
-          className="relative p-2"
-        >
-          <FiBell className="text-cyan-600 text-lg" />
-          <motion.span 
-            initial={{ scale: 0 }}
-            animate={{ scale: 1 }}
-            className="absolute top-0 right-0 bg-rose-500 text-white text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center shadow-sm"
-          >
-            3
-          </motion.span>
-        </motion.div>
-
-        {/* User Profile */}
-        <motion.div
-          whileHover={{ scale: 1.02 }}
-          className="flex items-center gap-2 pl-2 border-l border-cyan-200/40"
-        >
-          <div className="relative">
-            <img
-              src="https://i.pravatar.cc/40"
-              alt="Admin"
-              className="w-9 h-9 rounded-full border-2 border-cyan-500/30"
-            />
-            <div className="absolute bottom-0 right-0 w-3 h-3 bg-teal-400 rounded-full border-2 border-white"></div>
-          </div>
-          <div className="hidden md:flex flex-col">
-            <span className="text-sm font-medium text-cyan-900">Admin Cafenity</span>
-            <span className="text-xs text-cyan-600/80">Super Admin</span>
-          </div>
-        </motion.div>
+    
       </div>
     </motion.header>
   );
