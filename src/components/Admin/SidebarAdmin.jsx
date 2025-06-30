@@ -7,131 +7,153 @@ import Logo from "../Logo";
 export default function SidebarAdmin() {
   const navigate = useNavigate();
   const [adminData, setAdminData] = useState(null);
-  const [activeItem, setActiveItem] = useState("");
+  const [isCollapsed, setIsCollapsed] = useState(false);
 
   useEffect(() => {
-    const data = JSON.parse(localStorage.getItem("adminData"));
-    if (data) {
-      setAdminData(data);
-      const path = window.location.pathname;
-      if (path.includes("reservasi")) setActiveItem("reservasi");
-      else if (path.includes("kontak")) setActiveItem("kontak");
-      else setActiveItem("dashboard");
+    // Ambil data admin dari localStorage
+    const storedAdminData = localStorage.getItem('adminData');
+    if (storedAdminData) {
+      setAdminData(JSON.parse(storedAdminData));
     }
   }, []);
 
   const handleLogout = () => {
-    localStorage.removeItem("isAdminLoggedIn");
-    localStorage.removeItem("adminData");
-    localStorage.removeItem("loginTime");
-    navigate("/login");
+    navigate('/logout');
   };
 
   const menuItems = [
     {
-      id: "dashboard",
-      icon: <FiHome className="text-lg" />,
-      label: "Dashboard",
-      path: "/dashboard",
+      path: '/dashboard',
+      icon: <FiHome className="h-5 w-5" />,
+      label: 'Dashboard',
+      active: location.pathname === '/dashboard'
     },
     {
-      id: "reservasi",
-      icon: <FiBookOpen className="text-lg" />,
-      label: "Reservasi",
-      path: "/reservasiPesanan",
+      path: '/reservasiPesanan',
+      icon: <FiBookOpen className="h-5 w-5" />,
+      label: 'Reservasi',
+      active: location.pathname === '/reservasiPesanan'
     },
     {
-      id: "kontak",
-      icon: <FiUsers className="text-lg" />,
-      label: "Kelola Kontak",
-      path: "/kontak",
-    },
+      path: '/kontak',
+      icon: <FiUsers className="h-5 w-5" />,
+      label: 'Kelola Kontak',
+      active: location.pathname === '/kontak'
+    }
   ];
 
   return (
     <motion.div
-      initial={{ x: -20, opacity: 0 }}
-      animate={{ x: 0, opacity: 1 }}
+      initial={{ x: -250 }}
+      animate={{ x: 0 }}
       transition={{ duration: 0.3 }}
-      className="h-screen w-64 bg-gradient-to-b from-[#f0f8ff] to-[#e0f7fa] flex flex-col border-r border-cyan-200/50"
+      className={`bg-white/90 backdrop-blur-sm border-r border-cyan-200/50 shadow-lg transition-all duration-300 ${
+        isCollapsed ? 'w-16' : 'w-64'
+      } min-h-screen flex flex-col`}
     >
-      {/* Logo */}
-      <div className="p-4 border-b border-cyan-200/30">
-        <div className="flex items-center justify-center px-4">
-          <Logo />
+      {/* Header */}
+      <div className="p-4 border-b border-cyan-200/50">
+        <div className="flex items-center justify-between">
+            <div className="flex items-center space-x-3">
+              <Logo />
+            </div>
+          <button
+            onClick={() => setIsCollapsed(!isCollapsed)}
+            className="p-2 rounded-lg hover:bg-cyan-100/50 transition-colors"
+          >
+            <motion.div
+              animate={{ rotate: isCollapsed ? 180 : 0 }}
+              transition={{ duration: 0.2 }}
+            >
+            </motion.div>
+          </button>
         </div>
       </div>
 
-      {/* Menu Items */}
-      <nav className="flex-1 p-4 space-y-1 overflow-y-auto">
-        {menuItems.map((item) => (
-          <motion.button
-            key={item.id}
-            whileHover={{ x: 5 }}
-            whileTap={{ scale: 0.98 }}
-            onClick={() => {
-              navigate(item.path);
-              setActiveItem(item.id);
-            }}
-            className={`w-full flex items-center rounded-lg p-3 transition-all ${
-              activeItem === item.id
-                ? "bg-cyan-100 text-cyan-700 shadow-inner"
-                : "text-cyan-800/80 hover:bg-cyan-50"
-            }`}
-          >
-            <div className={`${activeItem === item.id ? "text-cyan-600" : "text-cyan-500"}`}>
-              {item.icon}
+      {/* Admin Info */}
+      {!isCollapsed && adminData && (
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.2 }}
+          className="p-4 border-b border-cyan-200/50"
+        >
+          <div className="flex items-center space-x-3">
+            <div className="h-10 w-10 rounded-full bg-gradient-to-r from-cyan-500 to-teal-500 flex items-center justify-center">
+              <FiUser className="h-5 w-5 text-white" />
             </div>
-            <motion.span
-              initial={{ opacity: 0, x: -10 }}
+            <div className="flex-1 min-w-0">
+              <p className="text-sm font-medium text-cyan-900 truncate">
+                {adminData.nama_lengkap}
+              </p>
+              <p className="text-xs text-cyan-600 truncate">
+                {adminData.email}
+              </p>
+            </div>
+          </div>
+        </motion.div>
+      )}
+
+      {/* Navigation Menu */}
+      <nav className="flex-1 p-4">
+        <ul className="space-y-2">
+          {menuItems.map((item, index) => (
+            <motion.li
+              key={item.path}
+              initial={{ opacity: 0, x: -20 }}
               animate={{ opacity: 1, x: 0 }}
-              className="ml-3 font-medium"
+              transition={{ delay: 0.1 * index }}
             >
-              {item.label}
-            </motion.span>
-          </motion.button>
-        ))}
+              <button
+                onClick={() => navigate(item.path)}
+                className={`w-full flex items-center space-x-3 px-4 py-3 rounded-lg transition-all duration-200 ${
+                  item.active
+                    ? 'bg-gradient-to-r from-cyan-500 to-teal-500 text-white shadow-md'
+                    : 'text-cyan-700 hover:bg-cyan-100/50 hover:text-cyan-900'
+                }`}
+                title={isCollapsed ? item.label : ''}
+              >
+                {item.icon}
+                {!isCollapsed && (
+                  <span className="font-medium">{item.label}</span>
+                )}
+              </button>
+            </motion.li>
+          ))}
+        </ul>
       </nav>
 
-      {/* User Profile & Logout */}
-      <div className="p-4 border-t border-cyan-200/30">
-        <div className="flex items-center justify-between mb-3 p-2 rounded-lg bg-cyan-50/50">
-          <div className="flex items-center">
-            <div className="relative">
-              <div className="w-8 h-8 rounded-full bg-cyan-100 flex items-center justify-center">
-                <FiUser className="text-cyan-600" />
-              </div>
-              <div className="absolute bottom-0 right-0 w-2 h-2 bg-teal-400 rounded-full border border-white"></div>
-            </div>
-            <motion.div
-              initial={{ opacity: 0, x: -10 }}
-              animate={{ opacity: 1, x: 0 }}
-              className="ml-3"
-            >
-              <p className="text-sm font-medium text-cyan-900 truncate max-w-[120px]">
-                {adminData?.nama_lengkap || "Admin"}
-              </p>
-              <p className="text-xs text-cyan-600/60">Administrator</p>
-            </motion.div>
-          </div>
-        </div>
-
+      {/* Logout Button */}
+      <div className="p-4 border-t border-cyan-200/50">
         <motion.button
           whileHover={{ scale: 1.02 }}
-          whileTap={{ scale: 0.95 }}
+          whileTap={{ scale: 0.98 }}
           onClick={handleLogout}
-          className="w-full flex items-center justify-center p-2 rounded-lg bg-rose-50 text-rose-600 hover:bg-rose-100 transition px-4"
+          className={`w-full flex items-center space-x-3 px-4 py-3 rounded-lg text-red-600 hover:text-red-800 hover:bg-red-50 transition-all duration-200 ${
+            isCollapsed ? 'justify-center' : ''
+          }`}
+          title={isCollapsed ? 'Logout' : ''}
         >
-          <FiLogOut />
-          <motion.span
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            className="ml-2 text-sm"
-          >
-            Logout
-          </motion.span>
+          <FiLogOut className="h-5 w-5" />
+          {!isCollapsed && (
+            <span className="font-medium">Logout</span>
+          )}
         </motion.button>
       </div>
+
+      {/* Footer */}
+      {!isCollapsed && (
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 0.4 }}
+          className="p-4 text-center border-t border-cyan-200/50"
+        >
+          <p className="text-xs text-cyan-600">
+            © 2024 Cafenity Admin
+          </p>
+        </motion.div>
+      )}
     </motion.div>
   );
 }

@@ -8,14 +8,14 @@ const HeaderAdmin = () => {
   const [searchFocused, setSearchFocused] = useState(false);
 
   return (
-    <motion.header 
+    <motion.header
       initial={{ y: -10, opacity: 0 }}
       animate={{ y: 0, opacity: 1 }}
       transition={{ duration: 0.3 }}
       className="bg-white/80 backdrop-blur-lg shadow-sm p-4 flex justify-between items-center border-b border-cyan-200/40"
     >
       {/* Search Box */}
-      <motion.div 
+      <motion.div
         animate={{
           width: searchFocused ? "400px" : "300px"
         }}
@@ -43,8 +43,14 @@ const HeaderAdmin = () => {
         >
           {darkMode ? <FiSun /> : <FiMoon />}
         </motion.button>
+        <FiUser />
+        <div>
+          <h2 className="text-lg font-bold text-cyan-900">Cafenity</h2>
+          <p className="text-xs text-cyan-600">Admin Panel</p>
+        </div>
 
-    
+
+
       </div>
     </motion.header>
   );

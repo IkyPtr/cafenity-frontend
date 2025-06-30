@@ -1,10 +1,17 @@
 import { useState } from 'react';
 import { motion } from 'framer-motion';
 import { FiUser, FiLock, FiLogIn, FiEye, FiEyeOff, FiAlertCircle } from 'react-icons/fi';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { supabase } from '../../lib/supabase';
 import '../../assets/Register.css';
 
 export default function Login() {
+  const navigate = useNavigate();
+  const location = useLocation();
+  
+  // Ambil halaman yang ingin diakses sebelum login
+  const from = location.state?.from || '/dashboard';
+
   const [formData, setFormData] = useState({
     username: '',
     password: ''
@@ -51,64 +58,75 @@ export default function Login() {
   };
 
   const handleSubmit = async (e) => {
-  e.preventDefault();
-
-  if (!validateForm()) {
-    return;
-  }
-
-  if (loginAttempts >= 5) {
-    setErrors({
-      general: 'Terlalu banyak percobaan login. Silakan tunggu beberapa menit.'
-    });
-    return;
-  }
-
-  setIsLoading(true);
-  setErrors({});
-  setSuccessMessage('');
-
-  try {
-    const username = formData.username.trim();
-    const password = formData.password;
-
-    const { data: adminData, error } = await supabase
-      .from('admin')
-      .select('*')
-      .eq('username', username)
-      .eq('password', password)
-      .single();
-
-    if (error || !adminData) {
-      setLoginAttempts(prev => prev + 1);
-      setErrors({ general: 'Username atau password salah. Silakan coba lagi.' });
+    e.preventDefault();
+    
+    if (!validateForm()) {
       return;
     }
 
-    // Login sukses
-    localStorage.setItem('adminData', JSON.stringify(adminData));
-    localStorage.setItem('isAdminLoggedIn', 'true');
-    localStorage.setItem('loginTime', new Date().toISOString());
+    if (loginAttempts >= 5) {
+      setErrors({ 
+        general: 'Terlalu banyak percobaan login. Silakan tunggu beberapa menit.' 
+      });
+      return;
+    }
 
-    setLoginAttempts(0);
-    setSuccessMessage(`Selamat datang, ${adminData.nama_lengkap}! Mengalihkan ke dashboard...`);
+    setIsLoading(true);
+    setErrors({});
+    setSuccessMessage('');
 
-    setFormData({ username: '', password: '' });
+    try {
+      const { data, error } = await supabase
+        .from('admin')
+        .select('id, nama_lengkap, email, username, no_hp, created_at')
+        .eq('username', formData.username.trim())
+        .eq('password', formData.password)
+        .single();
 
-    setTimeout(() => {
-      window.location.href = '/dashboard';
-    }, 2000);
+      if (error) {
+        if (error.code === 'PGRST116') {
+          setLoginAttempts(prev => prev + 1);
+          setErrors({ 
+            general: 'Username atau password salah. Silakan coba lagi.' 
+          });
+        } else {
+          console.error('Database error:', error);
+          setErrors({ 
+            general: 'Terjadi kesalahan sistem. Silakan coba lagi.' 
+          });
+        }
+        return;
+      }
 
-  } catch (error) {
-    console.error('Login error:', error);
-    setErrors({
-      general: 'Terjadi kesalahan saat login. Silakan coba lagi.'
-    });
-  } finally {
-    setIsLoading(false);
-  }
-};
+      // Login berhasil
+      console.log('Login berhasil:', data);
+      
+      localStorage.setItem('adminData', JSON.stringify(data));
+      localStorage.setItem('isAdminLoggedIn', 'true');
+      localStorage.setItem('loginTime', new Date().toISOString());
 
+      setLoginAttempts(0);
+      setSuccessMessage(`Selamat datang, ${data.nama_lengkap}! Mengalihkan...`);
+      
+      setFormData({
+        username: '',
+        password: ''
+      });
+
+      // Redirect ke halaman yang ingin diakses atau dashboard
+      setTimeout(() => {
+        navigate(from, { replace: true });
+      }, 1500);
+
+    } catch (error) {
+      console.error('Login error:', error);
+      setErrors({ 
+        general: 'Terjadi kesalahan saat login. Silakan coba lagi.' 
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-[#f0f8ff] to-[#e0f7fa] py-12 px-4 sm:px-6 lg:px-8">
@@ -165,6 +183,16 @@ export default function Login() {
           <p className="text-base text-cyan-700">
             Masuk ke panel administrasi Cafenity
           </p>
+          {/* Tampilkan pesan jika user diarahkan dari halaman admin */}
+          {location.state?.from && (
+            <motion.p 
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="text-sm text-amber-600 mt-2 bg-amber-50 px-3 py-2 rounded-lg border border-amber-200"
+            >
+              🔒 Silakan login untuk mengakses halaman admin
+            </motion.p>
+          )}
         </motion.div>
 
         <motion.div
@@ -262,7 +290,7 @@ export default function Login() {
                   id="remember-me"
                   name="remember-me"
                   type="checkbox"
-                  className="h-4 w-4 rounded border-gray-300 text-cyan-600 focus:ring-cyan-500"
+                  className="h-4 w-4 text-cyan-600 focus:ring-cyan-500 border-gray-300 rounded"
                 />
                 <label htmlFor="remember-me" className="ml-2 block text-sm text-cyan-700">
                   Ingat saya
@@ -270,57 +298,46 @@ export default function Login() {
               </div>
 
               <div className="text-sm">
-                <a 
-                  href="#" 
-                  className="font-medium text-cyan-600 hover:text-cyan-500 hover:underline"
-                  onClick={(e) => {
-                    e.preventDefault();
-                    alert('Fitur reset password belum tersedia. Hubungi administrator.');
-                  }}
+                <a
+                  href="/forgot"
+                  className="font-medium text-cyan-600 hover:text-cyan-500 transition-colors"
                 >
                   Lupa password?
                 </a>
               </div>
             </div>
 
-                       {/* Submit Button */}
+            {/* Submit Button */}
             <div>
               <motion.button
-                whileHover={{ scale: 1.02 }}
-                whileTap={{ scale: 0.98 }}
                 type="submit"
                 disabled={isLoading || loginAttempts >= 5}
-                className={`register-button ${isLoading || loginAttempts >= 5 ? 'opacity-50 cursor-not-allowed' : ''}`}
+                className="register-button"
+                whileHover={{ scale: isLoading ? 1 : 1.02 }}
+                whileTap={{ scale: isLoading ? 1 : 0.98 }}
               >
-                <span className="absolute left-0 inset-y-0 flex items-center pl-3">
-                  <FiLogIn className={`h-5 w-5 ${isLoading ? 'text-gray-300' : 'text-cyan-300'}`} />
-                </span>
                 {isLoading ? (
-                  <div className="flex items-center">
-                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
-                    Masuk...
+                  <div className="flex items-center justify-center">
+                    <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white mr-2"></div>
+                    Memproses...
                   </div>
                 ) : (
-                  'Masuk'
+                  <div className="flex items-center justify-center">
+                    <FiLogIn className="h-5 w-5 mr-2" />
+                    Masuk
+                  </div>
                 )}
               </motion.button>
             </div>
           </form>
 
-          {/* Additional Info */}
-          <div className="mt-6 text-center">
-            <p className="text-xs text-cyan-600">
-              Hanya admin yang memiliki akses ke sistem ini
-            </p>
-          </div>
-
           {/* Register Link */}
-          <div className="mt-4 text-center">
+          <div className="mt-6 text-center">
             <p className="text-sm text-cyan-700">
               Belum punya akun admin?{' '}
-              <a 
-                href="/register" 
-                className="font-medium text-cyan-600 hover:text-cyan-500 hover:underline"
+              <a
+                href="/register"
+                className="font-medium text-cyan-600 hover:text-cyan-500 transition-colors"
               >
                 Daftar di sini
               </a>
@@ -328,33 +345,17 @@ export default function Login() {
           </div>
         </motion.div>
 
-        {/* Floating Elements */}
-        {[...Array(3)].map((_, i) => (
-          <motion.div
-            key={i}
-            className="absolute"
-            style={{
-              fontSize: `${Math.random() * 12 + 6}px`,
-              left: `${Math.random() * 100}%`,
-              top: `${Math.random() * 100}%`,
-              color: 'rgba(6, 182, 212, 0.15)'
-            }}
-            animate={{
-              y: [0, Math.random() * 20 - 10],
-              x: [0, Math.random() * 20 - 10],
-              rotate: [0, 360],
-            }}
-            transition={{
-              duration: Math.random() * 8 + 6,
-              repeat: Infinity,
-              repeatType: 'reverse',
-              ease: 'easeInOut',
-              delay: i * 1
-            }}
-          >
-            ☕
-          </motion.div>
-        ))}
+        {/* Footer */}
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 0.6, delay: 0.4 }}
+          className="text-center"
+        >
+          <p className="text-sm text-cyan-600">
+            © 2024 Cafenity. Semua hak dilindungi.
+          </p>
+        </motion.div>
       </div>
     </div>
   );
