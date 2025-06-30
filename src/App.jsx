@@ -9,11 +9,11 @@ const GuestLayout = React.lazy(() => import("./layouts/GuestLayout"));
 
 const HomeGuest = React.lazy(() => import("./Pages/HomeGuest"));
 
-const Contact = React.lazy(() => import("./Pages/Contact"));
+const Contact = React.lazy(() => import("./pages/Contact"));
 
-const About = React.lazy(() => import("./Pages/AboutPage"));
+const About = React.lazy(() => import("./pages/AboutPage"));
 
-const MenuPage = React.lazy(() => import("./Pages/MenuPage"));
+const MenuPage = React.lazy(() => import("./pages/MenuPage"));
 
 const ReservationPage = React.lazy(() => import("./pages/ReservationPage"));
 
@@ -27,9 +27,11 @@ const KelolaKontak = React.lazy(() => import("./pages/Admin/KelolaKontak"));
 
 const CursorFollower = React.lazy(() => import("./components/CursorFollower"));
 
-const Register = React.lazy(() =>import("./Pages/Users/Register"));
-
-const Login = React.lazy(()  => import("./Pages/Users/Login"));
+const Register = React.lazy(() =>import("./pages/Auth/Register"));
+const Login = React.lazy(()  => import("./pages/Auth/Login"));
+const ForgotPassword = React.lazy(() => import("./pages/Auth/ForgotPasword"));
+const AuthLayout = React.lazy(() => import("./layouts/AuthLayout"));
+import ProtectedRoute from './components/Admin/ProtectedRoute';
 
 function App() {
   return (
@@ -45,13 +47,22 @@ function App() {
           <Route path="/about" element={<About />} />
         </Route>
 
-        {/* Admin Layout */}
-        <Route element={<AdminLayout />}>
+        {/* Admin Layout - DILINDUNGI */}
+        <Route element={
+          <ProtectedRoute>
+            <AdminLayout />
+          </ProtectedRoute>
+        }>
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/reservasiPesanan" element={<ReservasiPesanan />} />
           <Route path="/kontak" element={<KelolaKontak />} />
-          <Route path="/Registrasi" element={<Register/>}/>
-          <Route path="/login" element={<Login/>}/>
+        </Route>
+    
+        {/* Auth Layout */}
+        <Route element={<AuthLayout/>}>
+          <Route path="/login" element={<Login />} />
+          <Route path="/register" element={<Register/>} />
+          <Route path="/forgot" element={<ForgotPassword/>} />
         </Route>
       </Routes>
 
