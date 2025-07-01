@@ -97,6 +97,9 @@ export default function Footer() {
             &copy; {new Date().getFullYear()} Cafenity. All rights reserved.
           </p>
           <div className="flex gap-6">
+            <a href="/dashboard" className="text-sm opacity-80 hover:opacity-100 hover:text-[#90D1CA] transition-all duration-300">
+              Admin
+            </a>
             <a href="#" className="text-sm opacity-80 hover:opacity-100 hover:text-[#90D1CA] transition-all duration-300">
               Privacy Policy
             </a>
