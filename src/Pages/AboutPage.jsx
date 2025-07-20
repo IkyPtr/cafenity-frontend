@@ -263,7 +263,7 @@ const OurStory = ({ isDarkTheme }) => {
                   isDarkTheme ? 'bg-gray-700/50' : 'bg-cyan-100/50'
                 }`}>
                   <img
-                    src="/images/story-1.jpg"
+                    src="https://images.unsplash.com/photo-1554118811-1e0d58224f24?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80"
                     alt="Story"
                     className="w-full h-full object-cover hover:scale-110 transition-transform duration-500"
                   />
@@ -272,7 +272,7 @@ const OurStory = ({ isDarkTheme }) => {
                   isDarkTheme ? 'bg-gray-700/50' : 'bg-cyan-100/50'
                 }`}>
                   <img
-                    src="/images/story-2.jpg"
+                    src="https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80"
                     alt="Coffee Making"
                     className="w-full h-full object-cover hover:scale-110 transition-transform duration-500"
                   />
@@ -283,7 +283,7 @@ const OurStory = ({ isDarkTheme }) => {
                   isDarkTheme ? 'bg-gray-700/50' : 'bg-cyan-100/50'
                 }`}>
                   <img
-                    src="/images/story-3.jpg"
+                    src="https://images.unsplash.com/photo-1559056199-641a0ac8b55e?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80"
                     alt="Coffee Beans"
                     className="w-full h-full object-cover hover:scale-110 transition-transform duration-500"
                   />
@@ -292,7 +292,7 @@ const OurStory = ({ isDarkTheme }) => {
                   isDarkTheme ? 'bg-gray-700/50' : 'bg-cyan-100/50'
                 }`}>
                   <img
-                    src="/images/story-4.jpg"
+                    src="https://images.unsplash.com/photo-1592861956120-e524fc739696?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80"
                     alt="Cafe Interior"
                     className="w-full h-full object-cover hover:scale-110 transition-transform duration-500"
                   />
@@ -555,19 +555,19 @@ const Team = ({ isDarkTheme }) => {
     {
       name: "Sarah Johnson",
       role: "Founder & CEO",
-      image: "/images/team-1.jpg",
+      image: "https://images.unsplash.com/photo-1529626455594-4ff0802cfb7e?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80",
       description: "Visioner di balik Cafenity dengan pengalaman 15+ tahun di industri F&B",
     },
     {
       name: "Michael Chen",
       role: "Head Barista",
-      image: "/images/team-2.jpg",
+      image: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80",
       description: "Master barista dengan sertifikasi internasional dan passion untuk kopi specialty",
     },
     {
       name: "Emily Rodriguez",
       role: "Operations Manager",
-      image: "/images/team-3.jpg",
+      image: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80",
       description: "Ahli operasional yang memastikan setiap detail berjalan dengan sempurna",
     },
   ];
@@ -598,7 +598,7 @@ const Team = ({ isDarkTheme }) => {
           </p>
         </motion.div>
 
-        <div className="grid md:grid-cols-3 gap-8">
+                <div className="grid md:grid-cols-3 gap-8">
           {teamMembers.map((member, index) => (
             <motion.div
               key={index}
@@ -631,7 +631,7 @@ const Team = ({ isDarkTheme }) => {
                 }`}>
                   {member.name}
                 </h3>
-                                <p className={`font-medium mb-3 ${
+                <p className={`font-medium mb-3 ${
                   isDarkTheme ? 'text-cyan-400' : 'text-cyan-600'
                 }`}>
                   {member.role}
@@ -743,21 +743,21 @@ const Testimonials = ({ isDarkTheme }) => {
     {
       name: "Amanda Putri",
       role: "Food Blogger",
-      image: "/images/testimonial-1.jpg",
+      image: "https://images.unsplash.com/photo-1544005313-94ddf0286df2?ixlib=rb-4.0.3&auto=format&fit=crop&w=100&q=80",
       rating: 5,
       text: "Cafenity bukan hanya tempat minum kopi, tapi tempat di mana ide-ide kreatif bermunculan. Suasananya yang nyaman dan kopi yang luar biasa membuat saya selalu kembali lagi.",
     },
     {
       name: "David Santoso",
       role: "Entrepreneur",
-      image: "/images/testimonial-2.jpg",
+      image: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?ixlib=rb-4.0.3&auto=format&fit=crop&w=100&q=80",
       rating: 5,
       text: "Sebagai pengusaha yang sering meeting di cafe, Cafenity adalah pilihan terbaik. Pelayanannya profesional, wifi cepat, dan kopinya selalu konsisten.",
     },
     {
       name: "Lisa Maharani",
       role: "Designer",
-      image: "/images/testimonial-3.jpg",
+      image: "https://images.unsplash.com/photo-1487412720507-e7ab37603c6f?ixlib=rb-4.0.3&auto=format&fit=crop&w=100&q=80",
       rating: 5,
       text: "Tempat favorit saya untuk bekerja remote. Ambience-nya inspiring banget dan barista-nya ramah. Cold brew mereka adalah yang terbaik di Jakarta!",
     },
@@ -923,7 +923,7 @@ export default function AboutPage() {
     };
   }, []);
 
-  return (
+    return (
     <div className={`transition-colors duration-300 ${
       isDarkTheme ? 'bg-gray-900' : 'bg-white'
     }`}>
