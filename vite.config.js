@@ -5,24 +5,32 @@ import tailwindcss from '@tailwindcss/vite'
 // https://vite.dev/config/
 export default defineConfig({
   plugins: [react(), tailwindcss()],
+  base: '/',
+  resolve: {
+    extensions: ['.js', '.jsx', '.ts', '.tsx']
+  },
   build: {
     outDir: 'dist',
     sourcemap: false,
-    chunkSizeWarningLimit: 1000,
+    assetsDir: 'assets',
     rollupOptions: {
       output: {
         manualChunks: {
           vendor: ['react', 'react-dom'],
           router: ['react-router-dom'],
           motion: ['framer-motion'],
-          icons: ['react-icons'],
-          three: ['three', '@react-three/fiber', '@react-three/drei']
+          icons: ['react-icons']
         }
       }
     }
   },
   server: {
     port: 5173,
+    host: true,
+    historyApiFallback: true
+  },
+  preview: {
+    port: 4173,
     host: true
   }
 })
