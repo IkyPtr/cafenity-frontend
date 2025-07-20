@@ -301,21 +301,6 @@ export default function MenuPreviewSection() {
                 }`}>
                   {item.description}
                 </p>
-
-                {/* Action Button */}
-                <motion.button
-                  whileHover={{ scale: 1.02 }}
-                  whileTap={{ scale: 0.98 }}
-                  onClick={() => handleOrderNow(item)}
-                  className={`w-full py-2 px-4 rounded-lg font-medium text-sm transition-all duration-300 flex items-center justify-center group/btn ${
-                    isDarkTheme
-                      ? 'bg-cyan-500/20 text-cyan-400 hover:bg-cyan-500/30 border border-cyan-500/30'
-                      : 'bg-cyan-50 text-cyan-700 hover:bg-cyan-100 border border-cyan-200'
-                  }`}
-                >
-                  <span>Pesan Sekarang</span>
-                  <FiArrowRight className="ml-2 w-4 h-4 transition-transform group-hover/btn:translate-x-1" />
-                </motion.button>
               </div>
 
               {/* Bottom Accent */}
