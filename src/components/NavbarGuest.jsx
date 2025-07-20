@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
-import { FiMenu, FiX } from "react-icons/fi";
+import { FiMenu, FiX, FiUser } from "react-icons/fi";
 import Logo from "./Logo";
 import ThemeButton from "./ThemeButton";
 
@@ -81,6 +81,26 @@ export default function Navbar() {
             </Link>
           ))}
 
+          {/* Admin Login Button */}
+          <Link
+            to="/login"
+            className={`${linkBaseStyle} ${
+              isDarkTheme
+                ? "text-white hover:text-cyan-200 border border-cyan-400/30 hover:border-cyan-300"
+                : "text-cyan-800 hover:text-white border border-cyan-400/50 hover:border-cyan-500"
+            }`}
+          >
+            <span
+              className={`${hoverLayer} ${
+                isDarkTheme ? "bg-gradient-to-r from-cyan-500/30 to-teal-500/30" : "bg-gradient-to-r from-cyan-500/40 to-teal-500/40"
+              }`}
+            ></span>
+            <span className="relative z-10 flex items-center gap-2">
+              <FiUser className="w-4 h-4" />
+              Admin
+            </span>
+          </Link>
+
           {/* Tombol Ganti Tema dengan ukuran sejajar */}
           <div className="flex items-center">
             <div className="w-[56px] h-[36px]">
@@ -131,6 +151,27 @@ export default function Navbar() {
               <span className="relative z-10">{link.name}</span>
             </Link>
           ))}
+
+          {/* Admin Login Button Mobile */}
+          <Link
+            to="/login"
+            onClick={() => setIsOpen(false)}
+            className={`${linkBaseStyle} ${
+              isDarkTheme
+                ? "text-white hover:text-cyan-200 border border-cyan-400/30 hover:border-cyan-300"
+                : "text-cyan-800 hover:text-white border border-cyan-400/50 hover:border-cyan-500"
+            }`}
+          >
+            <span
+              className={`${hoverLayer} ${
+                isDarkTheme ? "bg-gradient-to-r from-cyan-500/30 to-teal-500/30" : "bg-gradient-to-r from-cyan-500/40 to-teal-500/40"
+              }`}
+            ></span>
+            <span className="relative z-10 flex items-center justify-center gap-2">
+              <FiUser className="w-4 h-4" />
+              Admin Login
+            </span>
+          </Link>
 
           {/* Tombol Ganti Tema Mobile */}
           <div className="flex justify-center">
