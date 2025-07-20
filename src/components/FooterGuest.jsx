@@ -199,7 +199,7 @@ export default function Footer() {
           </p>
           <div className="flex gap-6">
             <a 
-              href="/dashboard" 
+              to="/dashboard" 
               className={`text-sm transition-all duration-300 ${
                 isDarkTheme
                   ? 'text-white/70 hover:text-cyan-200'
