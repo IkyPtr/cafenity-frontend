@@ -57,6 +57,21 @@ export default function Login() {
     return Object.keys(newErrors).length === 0;
   };
 
+  // Test koneksi Supabase
+  const testSupabaseConnection = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('admin')
+        .select('count')
+        .limit(1);
+      
+      return { success: true, error: null };
+    } catch (error) {
+      console.error('Connection test failed:', error);
+      return { success: false, error };
+    }
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     
@@ -76,21 +91,39 @@ export default function Login() {
     setSuccessMessage('');
 
     try {
-      const { data, error } = await supabase
+      // Test koneksi terlebih dahulu
+      const connectionTest = await testSupabaseConnection();
+      if (!connectionTest.success) {
+        throw new Error('Tidak dapat terhubung ke server. Periksa koneksi internet Anda.');
+      }
+
+      // Lakukan query dengan timeout
+      const timeoutPromise = new Promise((_, reject) => {
+        setTimeout(() => reject(new Error('Request timeout')), 10000); // 10 detik timeout
+      });
+
+      const queryPromise = supabase
         .from('admin')
         .select('id, nama_lengkap, email, username, no_hp, created_at')
         .eq('username', formData.username.trim())
         .eq('password', formData.password)
         .single();
 
+      const { data, error } = await Promise.race([queryPromise, timeoutPromise]);
+
       if (error) {
+        console.error('Database error:', error);
+        
         if (error.code === 'PGRST116') {
           setLoginAttempts(prev => prev + 1);
           setErrors({ 
             general: 'Username atau password salah. Silakan coba lagi.' 
           });
+        } else if (error.message && error.message.includes('Failed to fetch')) {
+          setErrors({ 
+            general: 'Tidak dapat terhubung ke server. Periksa koneksi internet Anda.' 
+          });
         } else {
-          console.error('Database error:', error);
           setErrors({ 
             general: 'Terjadi kesalahan sistem. Silakan coba lagi.' 
           });
@@ -101,7 +134,17 @@ export default function Login() {
       // Login berhasil
       console.log('Login berhasil:', data);
       
-      localStorage.setItem('adminData', JSON.stringify(data));
+      // Simpan data admin ke localStorage
+      const adminData = {
+        id: data.id,
+        nama_lengkap: data.nama_lengkap,
+        email: data.email,
+        username: data.username,
+        no_hp: data.no_hp,
+        created_at: data.created_at
+      };
+
+      localStorage.setItem('adminData', JSON.stringify(adminData));
       localStorage.setItem('isAdminLoggedIn', 'true');
       localStorage.setItem('loginTime', new Date().toISOString());
 
@@ -120,9 +163,25 @@ export default function Login() {
 
     } catch (error) {
       console.error('Login error:', error);
-      setErrors({ 
-        general: 'Terjadi kesalahan saat login. Silakan coba lagi.' 
-      });
+      
+      // Handle berbagai jenis error
+      if (error.message === 'Request timeout') {
+        setErrors({ 
+          general: 'Koneksi timeout. Silakan coba lagi.' 
+        });
+      } else if (error.message && error.message.includes('Failed to fetch')) {
+        setErrors({ 
+          general: 'Tidak dapat terhubung ke server. Periksa koneksi internet Anda.' 
+        });
+      } else if (error.message && error.message.includes('NetworkError')) {
+        setErrors({ 
+          general: 'Terjadi kesalahan jaringan. Silakan coba lagi.' 
+        });
+      } else {
+        setErrors({ 
+          general: error.message || 'Terjadi kesalahan saat login. Silakan coba lagi.' 
+        });
+      }
     } finally {
       setIsLoading(false);
     }
@@ -239,6 +298,7 @@ export default function Login() {
                   className={`register-input ${errors.username ? 'error' : ''}`}
                   placeholder="Masukkan username"
                   autoComplete="username"
+                  disabled={isLoading}
                 />
               </div>
               {errors.username && (
@@ -265,11 +325,13 @@ export default function Login() {
                   style={{ paddingRight: '2.5rem' }}
                   placeholder="Masukkan password"
                   autoComplete="current-password"
+                  disabled={isLoading}
                 />
                 <button
                   type="button"
                   className="absolute inset-y-0 right-0 pr-3 flex items-center"
                   onClick={() => setShowPassword(!showPassword)}
+                  disabled={isLoading}
                 >
                   {showPassword ? (
                     <FiEyeOff className="h-5 w-5 text-cyan-500 hover:text-cyan-700" />
@@ -291,6 +353,7 @@ export default function Login() {
                   name="remember-me"
                   type="checkbox"
                   className="h-4 w-4 text-cyan-600 focus:ring-cyan-500 border-gray-300 rounded"
+                  disabled={isLoading}
                 />
                 <label htmlFor="remember-me" className="ml-2 block text-sm text-cyan-700">
                   Ingat saya
@@ -322,7 +385,7 @@ export default function Login() {
                     Memproses...
                   </div>
                 ) : (
-                  <div className="flex items-center justify-center">
+                                    <div className="flex items-center justify-center">
                     <FiLogIn className="h-5 w-5 mr-2" />
                     Masuk
                   </div>
