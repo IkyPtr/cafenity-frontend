@@ -9,7 +9,27 @@ export default function Navbar() {
   const [scrolled, setScrolled] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
 
-  const toggleTheme = () => setIsDarkTheme(!isDarkTheme);
+  const toggleTheme = () => {
+    const newTheme = !isDarkTheme;
+    setIsDarkTheme(newTheme);
+    
+    // Simpan ke localStorage
+    localStorage.setItem('isDarkTheme', JSON.stringify(newTheme));
+    
+    // Dispatch custom event untuk komponen lain
+    window.dispatchEvent(new CustomEvent('themeChanged', {
+      detail: { isDark: newTheme }
+    }));
+  };
+
+  useEffect(() => {
+    // Load theme dari localStorage saat component mount
+    const storedTheme = localStorage.getItem('isDarkTheme');
+    if (storedTheme) {
+      const parsedTheme = JSON.parse(storedTheme);
+      setIsDarkTheme(parsedTheme);
+    }
+  }, []);
 
   useEffect(() => {
     const handleScroll = () => setScrolled(window.scrollY > 10);

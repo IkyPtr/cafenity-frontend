@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { FiCalendar, FiClock, FiUser, FiMail, FiPhone, FiUsers, FiMinus, FiPlus, FiCheck } from 'react-icons/fi';
+import { FiCalendar, FiClock, FiUser, FiMail, FiPhone, FiUsers, FiMinus, FiPlus, FiCheck, FiX } from 'react-icons/fi';
 import { motion, AnimatePresence } from 'framer-motion';
 import { supabase } from '../lib/supabase';
 
@@ -27,6 +27,7 @@ const itemVariants = {
 };
 
 export default function ReservationPage() {
+  const [isDarkTheme, setIsDarkTheme] = useState(false);
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -40,9 +41,46 @@ export default function ReservationPage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitSuccess, setSubmitSuccess] = useState(false);
   const [submitError, setSubmitError] = useState('');
+  const [countdown, setCountdown] = useState(7);
 
   // Set tanggal minimum ke hari ini
   const today = new Date().toISOString().split('T')[0];
+
+  // Sync dengan dark mode dari NavbarGuest
+  useEffect(() => {
+    // Ambil initial state dari localStorage jika ada
+    const storedTheme = localStorage.getItem('isDarkTheme');
+    if (storedTheme) {
+      setIsDarkTheme(JSON.parse(storedTheme));
+    }
+
+    // Listen untuk perubahan theme dari ThemeButton
+    const handleThemeChange = (event) => {
+      setIsDarkTheme(event.detail.isDark);
+    };
+
+    window.addEventListener('themeChanged', handleThemeChange);
+
+    return () => {
+      window.removeEventListener('themeChanged', handleThemeChange);
+    };
+  }, []);
+
+  // Countdown timer untuk auto-close success message
+  useEffect(() => {
+    let timer;
+    if (submitSuccess && countdown > 0) {
+      timer = setTimeout(() => {
+        setCountdown(countdown - 1);
+      }, 1000);
+    } else if (submitSuccess && countdown === 0) {
+      handleCloseSuccess();
+    }
+
+    return () => {
+      if (timer) clearTimeout(timer);
+    };
+  }, [submitSuccess, countdown]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -77,6 +115,7 @@ export default function ReservationPage() {
       if (error) throw error;
 
       setSubmitSuccess(true);
+      setCountdown(7); // Reset countdown
     } catch (error) {
       setSubmitError('Terjadi kesalahan. Pastikan semua data terisi dengan benar dan coba lagi.');
       console.error('Error submitting reservation:', error);
@@ -85,16 +124,73 @@ export default function ReservationPage() {
     }
   };
 
+  const handleCloseSuccess = () => {
+    setSubmitSuccess(false);
+    setCountdown(7);
+    // Reset form data
+    setFormData({
+      name: '',
+      email: '',
+      phone: '',
+      reservation_date: '',
+      reservation_time: '',
+      guest_count: 2,
+      special_requests: '',
+    });
+  };
+
   if (submitSuccess) {
     return (
-        <section className="min-h-screen flex items-center justify-center pt-24 pb-12 px-4 sm:px-6 lg:px-8 bg-gradient-to-br from-teal-50/50 to-cyan-50/50">
+        <section className={`min-h-screen flex items-center justify-center pt-24 pb-12 px-4 sm:px-6 lg:px-8 transition-colors duration-300 ${
+          isDarkTheme 
+            ? 'bg-gradient-to-br from-gray-900/90 to-gray-800/90' 
+            : 'bg-gradient-to-br from-teal-50/50 to-cyan-50/50'
+        }`}>
             <motion.div
                 initial={{ opacity: 0, scale: 0.8 }}
                 animate={{ opacity: 1, scale: 1 }}
                 transition={{ duration: 0.7, ease: 'easeOut' }}
-                className="text-center bg-white/50 backdrop-blur-2xl p-8 md:p-12 rounded-3xl shadow-2xl shadow-cyan-500/10 max-w-lg mx-auto"
+                className={`relative text-center p-8 md:p-12 rounded-3xl shadow-2xl max-w-lg mx-auto transition-all duration-300 ${
+                  isDarkTheme
+                    ? 'bg-gray-800/50 backdrop-blur-2xl shadow-cyan-500/20'
+                    : 'bg-white/50 backdrop-blur-2xl shadow-cyan-500/10'
+                }`}
             >
-                <div className="w-24 h-24 bg-gradient-to-br from-teal-400 to-cyan-500 rounded-full flex items-center justify-center mx-auto mb-6 shadow-lg shadow-cyan-500/30">
+                {/* Close Button */}
+                <motion.button
+                    initial={{ opacity: 0, scale: 0 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    transition={{ delay: 0.5, duration: 0.3 }}
+                    onClick={handleCloseSuccess}
+                    className={`absolute top-4 right-4 p-2 rounded-full transition-all duration-300 hover:scale-110 ${
+                      isDarkTheme
+                        ? 'bg-gray-700/50 text-gray-300 hover:bg-gray-600/70 hover:text-white'
+                        : 'bg-white/50 text-gray-600 hover:bg-white/80 hover:text-gray-800'
+                    }`}
+                    title="Tutup"
+                >
+                    <FiX className="w-5 h-5" />
+                </motion.button>
+
+                {/* Countdown Timer */}
+                <motion.div
+                    initial={{ opacity: 0, y: -10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.3, duration: 0.5 }}
+                    className={`absolute top-4 left-4 px-3 py-1 rounded-full text-xs font-medium transition-colors duration-300 ${
+                      isDarkTheme
+                        ? 'bg-cyan-500/20 text-cyan-400 border border-cyan-500/30'
+                        : 'bg-cyan-100 text-cyan-700 border border-cyan-200'
+                    }`}
+                >
+                    Auto tutup: {countdown}s
+                </motion.div>
+
+                <div className={`w-24 h-24 rounded-full flex items-center justify-center mx-auto mb-6 shadow-lg ${
+                  isDarkTheme
+                    ? 'bg-gradient-to-br from-teal-500 to-cyan-600 shadow-cyan-500/40'
+                    : 'bg-gradient-to-br from-teal-400 to-cyan-500 shadow-cyan-500/30'
+                }`}>
                     <motion.svg
                         className="w-16 h-16 text-white"
                         fill="none"
@@ -112,30 +208,103 @@ export default function ReservationPage() {
                         />
                     </motion.svg>
                 </div>
-                <h2 className="text-3xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-teal-600 to-cyan-600 mb-3">
+                
+                <h2 className={`text-3xl font-bold mb-3 ${
+                  isDarkTheme
+                    ? 'text-transparent bg-clip-text bg-gradient-to-r from-teal-400 to-cyan-400'
+                    : 'text-transparent bg-clip-text bg-gradient-to-r from-teal-600 to-cyan-600'
+                }`}>
                     Reservasi Berhasil!
                 </h2>
-                <p className="text-teal-700/80 mb-6 text-lg">
+                
+                <p className={`mb-6 text-lg ${
+                  isDarkTheme ? 'text-gray-300' : 'text-teal-700/80'
+                }`}>
                     Terima kasih, {formData.name}. Meja Anda telah kami siapkan.
                 </p>
-                <div className="text-left bg-teal-50/70 p-4 rounded-xl border border-teal-200/50 text-teal-800 space-y-2">
+                
+                <div className={`text-left p-4 rounded-xl border space-y-2 mb-6 ${
+                  isDarkTheme
+                    ? 'bg-gray-700/70 border-gray-600/50 text-gray-200'
+                    : 'bg-teal-50/70 border-teal-200/50 text-teal-800'
+                }`}>
                     <p><FiCalendar className="inline mr-2" /> <strong>Tanggal:</strong> {new Date(formData.reservation_date).toLocaleDateString('id-ID', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}</p>
                     <p><FiClock className="inline mr-2" /> <strong>Waktu:</strong> {formData.reservation_time}</p>
                     <p><FiUsers className="inline mr-2" /> <strong>Jumlah Tamu:</strong> {formData.guest_count} orang</p>
                 </div>
-                <p className="text-sm text-teal-500 mt-6">Sebuah email konfirmasi akan segera dikirimkan. Sampai jumpa!</p>
+
+                {/* Action Buttons */}
+                <div className="flex flex-col sm:flex-row gap-3 mb-6">
+                    <motion.button
+                        whileHover={{ scale: 1.02 }}
+                        whileTap={{ scale: 0.98 }}
+                        onClick={handleCloseSuccess}
+                        className={`flex-1 py-3 px-6 rounded-xl font-semibold transition-all duration-300 ${
+                          isDarkTheme
+                            ? 'bg-gradient-to-r from-teal-600 to-cyan-600 hover:from-teal-700 hover:to-cyan-700 text-white shadow-lg shadow-teal-500/25'
+                            : 'bg-gradient-to-r from-teal-500 to-cyan-500 hover:from-teal-600 hover:to-cyan-600 text-white shadow-lg shadow-teal-500/25'
+                        }`}
+                    >
+                        Buat Reservasi Lagi
+                    </motion.button>
+                    
+                    <motion.button
+                        whileHover={{ scale: 1.02 }}
+                        whileTap={{ scale: 0.98 }}
+                        onClick={() => window.location.href = '/menu'}
+                        className={`flex-1 py-3 px-6 rounded-xl font-semibold border-2 transition-all duration-300 ${
+                          isDarkTheme
+                            ? 'border-cyan-400 text-cyan-400 hover:bg-cyan-400/10'
+                            : 'border-teal-500 text-teal-600 hover:bg-teal-50'
+                        }`}
+                    >
+                        Lihat Menu
+                    </motion.button>
+                </div>
+
+                <p className={`text-sm ${
+                  isDarkTheme ? 'text-gray-400' : 'text-teal-500'
+                }`}>
+                  Sebuah email konfirmasi akan segera dikirimkan. Sampai jumpa!
+                </p>
+
+                {/* Progress Bar */}
+                <div className={`mt-4 w-full h-1 rounded-full overflow-hidden ${
+                  isDarkTheme ? 'bg-gray-700' : 'bg-gray-200'
+                }`}>
+                    <motion.div
+                        initial={{ width: '100%' }}
+                        animate={{ width: '0%' }}
+                        transition={{ duration: 7, ease: 'linear' }}
+                        className={`h-full transition-colors duration-300 ${
+                          isDarkTheme
+                            ? 'bg-gradient-to-r from-cyan-400 to-teal-400'
+                            : 'bg-gradient-to-r from-teal-500 to-cyan-500'
+                        }`}
+                    />
+                </div>
             </motion.div>
         </section>
     );
   }
 
   return (
-    <section className="min-h-screen pt-32 pb-12 px-4 sm:px-6 lg:px-8 bg-gradient-to-br from-teal-50/50 to-cyan-50/50 overflow-hidden">
+    <section className={`min-h-screen pt-32 pb-12 px-4 sm:px-6 lg:px-8 overflow-hidden transition-colors duration-300 ${
+      isDarkTheme 
+        ? 'bg-gradient-to-br from-gray-900/90 to-gray-800/90' 
+        : 'bg-gradient-to-br from-teal-50/50 to-cyan-50/50'
+    }`}>
         {/* Animated background blobs */}
         <div className="absolute inset-0 z-0 pointer-events-none">
-            <motion.div className="absolute top-0 -left-24 w-72 h-72 bg-cyan-200/30 rounded-full filter blur-3xl opacity-50 animate-blob" />
-            <motion.div className="absolute top-1/2 -right-24 w-72 h-72 bg-teal-200/30 rounded-full filter blur-3xl opacity-50 animate-blob animation-delay-2000" />
-            <motion.div className="absolute bottom-0 left-1/4 w-72 h-72 bg-cyan-100/30 rounded-full filter blur-3xl opacity-50 animate-blob animation-delay-4000" />
+            <motion.div className={`absolute top-0 -left-24 w-72 h-72 rounded-full filter blur-3xl opacity-50 animate-blob ${
+              isDarkTheme ? 'bg-cyan-600/20' : 'bg-cyan-200/30'
+            }`} />
+            <motion.div className={`absolute top-1/2 -right-24 w-72 h-72 rounded-full filter blur-3xl opacity-50 animate-blob animation-delay-2000 ${
+              isDarkTheme ? 'bg-teal-600/20' : 'bg-teal-200/30'
+            }`} />
+            <motion.div className={`absolute bottom-0 left-1/4 w-72 h-72 rounded-full filter blur-3xl opacity-50 animate-blob animation-delay-4000 ${
+              isDarkTheme ? 'bg-cyan-500/20' : 'bg-cyan-100/30'
+            }`} />
         </div>
         
         <div className="relative z-10 max-w-7xl mx-auto">
@@ -145,153 +314,441 @@ export default function ReservationPage() {
                 animate="visible"
                 variants={containerVariants}
             >
-                <h1 className="text-4xl md:text-5xl lg:text-6xl font-extrabold text-teal-900/90 mb-4 tracking-tight">
-                    {"Pesan Tempat Anda".split(" ").map((word, i) => (
-                        <motion.span key={i} variants={itemVariants} className="inline-block mr-3">
-                            {word}
-                        </motion.span>
-                    ))}
+                                <h1 className={`text-4xl md:text-5xl lg:text-6xl font-extrabold mb-4 tracking-tight ${
+                  isDarkTheme
+                    ? 'text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-teal-400'
+                    : 'text-transparent bg-clip-text bg-gradient-to-r from-teal-600 to-cyan-600'
+                }`}>
+                    Reservasi Meja
                 </h1>
-                <motion.p variants={itemVariants} className="text-lg text-teal-700/80 max-w-2xl mx-auto">
-                    Amankan meja Anda untuk pengalaman ngopi terbaik di Cafenity.
+                <motion.p 
+                    variants={itemVariants}
+                    className={`text-lg md:text-xl max-w-2xl mx-auto ${
+                      isDarkTheme ? 'text-gray-300' : 'text-teal-700/80'
+                    }`}
+                >
+                    Nikmati pengalaman kuliner terbaik dengan reservasi yang mudah dan cepat
                 </motion.p>
             </motion.div>
 
-            <div className="grid lg:grid-cols-5 gap-12 items-start">
+            <div className="grid lg:grid-cols-2 gap-12 items-start">
                 {/* Form Section */}
                 <motion.div
-                    initial={{ opacity: 0, y: 50 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.7, delay: 0.3, ease: 'easeOut' }}
-                    className="lg:col-span-3 bg-white/40 backdrop-blur-xl border border-white/50 rounded-3xl shadow-2xl shadow-cyan-500/10 p-6 sm:p-8 lg:p-10"
+                    initial={{ opacity: 0, x: -50 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ duration: 0.8, delay: 0.2 }}
+                    className={`p-8 rounded-3xl shadow-2xl backdrop-blur-xl border transition-all duration-300 ${
+                      isDarkTheme
+                        ? 'bg-gray-800/50 border-gray-600/30 shadow-cyan-500/10'
+                        : 'bg-white/50 border-white/30 shadow-teal-500/10'
+                    }`}
                 >
+                    <h2 className={`text-2xl font-bold mb-6 ${
+                      isDarkTheme ? 'text-white' : 'text-teal-800'
+                    }`}>
+                        Detail Reservasi
+                    </h2>
+
+                    {submitError && (
+                        <motion.div
+                            initial={{ opacity: 0, y: -10 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            className={`mb-6 p-4 rounded-xl border transition-colors duration-300 ${
+                              isDarkTheme
+                                ? 'bg-red-900/20 border-red-500/30 text-red-400'
+                                : 'bg-red-50 border-red-200 text-red-600'
+                            }`}
+                        >
+                            <div className="flex items-center">
+                                <FiX className="w-5 h-5 mr-2" />
+                                {submitError}
+                            </div>
+                        </motion.div>
+                    )}
+
                     <form onSubmit={handleSubmit} className="space-y-6">
-                        <motion.div variants={containerVariants} initial="hidden" animate="visible" className="grid gap-6 sm:grid-cols-2">
-                            {/* Input fields */}
-                            {[
-                                { name: 'name', type: 'text', placeholder: 'Nama Lengkap', icon: FiUser, required: true },
-                                { name: 'email', type: 'email', placeholder: 'Alamat Email', icon: FiMail, required: true },
-                                { name: 'phone', type: 'tel', placeholder: 'Nomor Telepon', icon: FiPhone, required: true },
-                            ].map(field => (
-                                <motion.div variants={itemVariants} key={field.name} className="relative">
-                                    <field.icon className="absolute top-1/2 left-4 -translate-y-1/2 text-teal-600/70" />
-                                    <input {...field} value={formData[field.name]} onChange={handleChange} className="pl-12 w-full bg-white/70 border-2 border-transparent focus:border-teal-400 focus:bg-white focus:ring-4 focus:ring-teal-500/20 rounded-xl py-3.5 px-4 text-teal-900 placeholder-teal-500/80 transition-all duration-300 outline-none"/>
-                                </motion.div>
-                            ))}
+                        {/* Name Field */}
+                        <motion.div variants={itemVariants}>
+                            <label className={`block text-sm font-medium mb-2 ${
+                              isDarkTheme ? 'text-gray-300' : 'text-teal-700'
+                            }`}>
+                                <FiUser className="inline mr-2" />
+                                Nama Lengkap
+                            </label>
+                            <input
+                                type="text"
+                                name="name"
+                                value={formData.name}
+                                onChange={handleChange}
+                                required
+                                className={`w-full px-4 py-3 rounded-xl border transition-all duration-300 focus:ring-2 focus:ring-offset-2 ${
+                                  isDarkTheme
+                                    ? 'bg-gray-700/50 border-gray-600 text-white placeholder-gray-400 focus:ring-cyan-500 focus:border-cyan-500'
+                                    : 'bg-white/70 border-gray-300 text-gray-900 placeholder-gray-500 focus:ring-teal-500 focus:border-teal-500'
+                                }`}
+                                placeholder="Masukkan nama lengkap"
+                            />
+                        </motion.div>
 
-                            {/* Guest Counter - Desain Baru yang Lebih Rapi */}
-                            <motion.div 
-                                variants={itemVariants} 
-                                className="bg-white/70 border-2 border-transparent rounded-xl flex items-center justify-between py-2.5 px-4 sm:col-span-2"
-                            >
-                                <div className="flex items-center">
-                                    <FiUsers className="text-teal-600/70 mr-4" />
-                                    <span className="text-teal-900 placeholder-teal-500/80">Jumlah Tamu</span>
-                                </div>
-                                <div className="flex items-center gap-3">
-                                    <button 
-                                        type="button" 
-                                        onClick={() => handleGuestChange(-1)} 
-                                        className="w-8 h-8 rounded-full bg-teal-100/80 text-teal-700 hover:bg-teal-200 transition-all flex items-center justify-center text-lg font-bold disabled:opacity-50 disabled:cursor-not-allowed" 
-                                        disabled={formData.guest_count <= 1}
-                                    >
-                                        <FiMinus />
-                                    </button>
-                                    <span className="text-lg font-bold text-teal-800 w-8 text-center">{formData.guest_count}</span>
-                                    <button 
-                                        type="button" 
-                                        onClick={() => handleGuestChange(1)} 
-                                        className="w-8 h-8 rounded-full bg-teal-100/80 text-teal-700 hover:bg-teal-200 transition-all flex items-center justify-center text-lg font-bold disabled:opacity-50 disabled:cursor-not-allowed" 
-                                        disabled={formData.guest_count >= 12}
-                                    >
-                                        <FiPlus />
-                                    </button>
-                                </div>
-                            </motion.div>
+                        {/* Email Field */}
+                        <motion.div variants={itemVariants}>
+                            <label className={`block text-sm font-medium mb-2 ${
+                              isDarkTheme ? 'text-gray-300' : 'text-teal-700'
+                            }`}>
+                                <FiMail className="inline mr-2" />
+                                Email
+                            </label>
+                            <input
+                                type="email"
+                                name="email"
+                                value={formData.email}
+                                onChange={handleChange}
+                                required
+                                className={`w-full px-4 py-3 rounded-xl border transition-all duration-300 focus:ring-2 focus:ring-offset-2 ${
+                                  isDarkTheme
+                                    ? 'bg-gray-700/50 border-gray-600 text-white placeholder-gray-400 focus:ring-cyan-500 focus:border-cyan-500'
+                                    : 'bg-white/70 border-gray-300 text-gray-900 placeholder-gray-500 focus:ring-teal-500 focus:border-teal-500'
+                                }`}
+                                placeholder="nama@email.com"
+                            />
+                        </motion.div>
 
+                        {/* Phone Field */}
+                        <motion.div variants={itemVariants}>
+                            <label className={`block text-sm font-medium mb-2 ${
+                              isDarkTheme ? 'text-gray-300' : 'text-teal-700'
+                            }`}>
+                                <FiPhone className="inline mr-2" />
+                                Nomor Telepon
+                            </label>
+                            <input
+                                type="tel"
+                                name="phone"
+                                value={formData.phone}
+                                onChange={handleChange}
+                                required
+                                className={`w-full px-4 py-3 rounded-xl border transition-all duration-300 focus:ring-2 focus:ring-offset-2 ${
+                                  isDarkTheme
+                                    ? 'bg-gray-700/50 border-gray-600 text-white placeholder-gray-400 focus:ring-cyan-500 focus:border-cyan-500'
+                                    : 'bg-white/70 border-gray-300 text-gray-900 placeholder-gray-500 focus:ring-teal-500 focus:border-teal-500'
+                                }`}
+                                placeholder="08xxxxxxxxxx"
+                            />
+                        </motion.div>
+
+                        {/* Date and Time Row */}
+                        <div className="grid md:grid-cols-2 gap-4">
                             {/* Date Field */}
-                            <motion.div variants={itemVariants} className="relative">
-                                <FiCalendar className="absolute top-1/2 left-4 -translate-y-1/2 text-teal-600/70" />
-                                <input type="date" name="reservation_date" value={formData.reservation_date} onChange={handleChange} required min={today} className="pl-12 w-full bg-white/70 border-2 border-transparent focus:border-teal-400 focus:bg-white focus:ring-4 focus:ring-teal-500/20 rounded-xl py-3.5 px-4 text-teal-900 placeholder-teal-500/80 transition-all duration-300 outline-none [color-scheme:light]"/>
+                            <motion.div variants={itemVariants}>
+                                <label className={`block text-sm font-medium mb-2 ${
+                                  isDarkTheme ? 'text-gray-300' : 'text-teal-700'
+                                }`}>
+                                    <FiCalendar className="inline mr-2" />
+                                    Tanggal
+                                </label>
+                                <input
+                                    type="date"
+                                    name="reservation_date"
+                                    value={formData.reservation_date}
+                                    onChange={handleChange}
+                                    min={today}
+                                    required
+                                    className={`w-full px-4 py-3 rounded-xl border transition-all duration-300 focus:ring-2 focus:ring-offset-2 ${
+                                      isDarkTheme
+                                        ? 'bg-gray-700/50 border-gray-600 text-white focus:ring-cyan-500 focus:border-cyan-500'
+                                        : 'bg-white/70 border-gray-300 text-gray-900 focus:ring-teal-500 focus:border-teal-500'
+                                    }`}
+                                />
                             </motion.div>
 
                             {/* Time Field */}
-                            <motion.div variants={itemVariants} className="relative">
-                                <FiClock className="absolute top-1/2 left-4 -translate-y-1/2 text-teal-600/70" />
-                                <select name="reservation_time" value={formData.reservation_time} onChange={handleChange} required className="pl-12 w-full bg-white/70 border-2 border-transparent focus:border-teal-400 focus:bg-white focus:ring-4 focus:ring-teal-500/20 rounded-xl py-3.5 px-4 text-teal-900 appearance-none transition-all duration-300 outline-none">
-                                    <option value="" disabled>Pilih Waktu</option>
-                                    {['08:00', '09:00', '10:00', '11:00', '12:00', '13:00', '14:00', '15:00', '16:00', '17:00', '18:00', '19:00', '20:00'].map(time => (<option key={time} value={time}>{time}</option>))}
-                                </select>
+                            <motion.div variants={itemVariants}>
+                                <label className={`block text-sm font-medium mb-2 ${
+                                  isDarkTheme ? 'text-gray-300' : 'text-teal-700'
+                                }`}>
+                                    <FiClock className="inline mr-2" />
+                                    Waktu
+                                </label>
+                                <input
+                                    type="time"
+                                    name="reservation_time"
+                                    value={formData.reservation_time}
+                                    onChange={handleChange}
+                                    required
+                                    className={`w-full px-4 py-3 rounded-xl border transition-all duration-300 focus:ring-2 focus:ring-offset-2 ${
+                                      isDarkTheme
+                                        ? 'bg-gray-700/50 border-gray-600 text-white focus:ring-cyan-500 focus:border-cyan-500'
+                                        : 'bg-white/70 border-gray-300 text-gray-900 focus:ring-teal-500 focus:border-teal-500'
+                                    }`}
+                                />
                             </motion.div>
-                        </motion.div>
+                        </div>
 
-                        {/* Special Request */}
+                        {/* Guest Count */}
                         <motion.div variants={itemVariants}>
-                            <textarea name="special_requests" value={formData.special_requests} onChange={handleChange} rows={3} placeholder="Permintaan Khusus (opsional)" className="w-full bg-white/70 border-2 border-transparent focus:border-teal-400 focus:bg-white focus:ring-4 focus:ring-teal-500/20 rounded-xl py-3 px-4 text-teal-900 placeholder-teal-500/80 transition-all duration-300 outline-none resize-none"/>
+                            <label className={`block text-sm font-medium mb-2 ${
+                              isDarkTheme ? 'text-gray-300' : 'text-teal-700'
+                            }`}>
+                                <FiUsers className="inline mr-2" />
+                                Jumlah Tamu
+                            </label>
+                            <div className="flex items-center space-x-4">
+                                <motion.button
+                                    type="button"
+                                    whileHover={{ scale: 1.1 }}
+                                    whileTap={{ scale: 0.9 }}
+                                    onClick={() => handleGuestChange(-1)}
+                                    className={`p-2 rounded-full transition-all duration-300 ${
+                                      isDarkTheme
+                                        ? 'bg-gray-700 text-cyan-400 hover:bg-gray-600'
+                                        : 'bg-teal-100 text-teal-600 hover:bg-teal-200'
+                                    }`}
+                                >
+                                    <FiMinus className="w-4 h-4" />
+                                </motion.button>
+                                <span className={`text-xl font-semibold min-w-[3rem] text-center ${
+                                  isDarkTheme ? 'text-white' : 'text-teal-800'
+                                }`}>
+                                    {formData.guest_count}
+                                </span>
+                                <motion.button
+                                    type="button"
+                                    whileHover={{ scale: 1.1 }}
+                                    whileTap={{ scale: 0.9 }}
+                                    onClick={() => handleGuestChange(1)}
+                                    className={`p-2 rounded-full transition-all duration-300 ${
+                                      isDarkTheme
+                                        ? 'bg-gray-700 text-cyan-400 hover:bg-gray-600'
+                                        : 'bg-teal-100 text-teal-600 hover:bg-teal-200'
+                                    }`}
+                                >
+                                    <FiPlus className="w-4 h-4" />
+                                </motion.button>
+                            </div>
                         </motion.div>
 
-                        {/* Error Message */}
-                        <AnimatePresence>
-                            {submitError && (
-                                <motion.div
-                                    initial={{ opacity: 0, height: 0 }}
-                                    animate={{ opacity: 1, height: 'auto' }}
-                                    exit={{ opacity: 0, height: 0 }}
-                                    className="p-3 bg-red-100 border border-red-300 rounded-lg text-center text-red-800 text-sm"
-                                >
-                                    {submitError}
-                                </motion.div>
-                            )}
-                        </AnimatePresence>
+                        {/* Special Requests */}
+                        <motion.div variants={itemVariants}>
+                            <label className={`block text-sm font-medium mb-2 ${
+                              isDarkTheme ? 'text-gray-300' : 'text-teal-700'
+                            }`}>
+                                Permintaan Khusus (Opsional)
+                            </label>
+                            <textarea
+                                name="special_requests"
+                                value={formData.special_requests}
+                                onChange={handleChange}
+                                rows={3}
+                                className={`w-full px-4 py-3 rounded-xl border transition-all duration-300 focus:ring-2 focus:ring-offset-2 resize-none ${
+                                  isDarkTheme
+                                    ? 'bg-gray-700/50 border-gray-600 text-white placeholder-gray-400 focus:ring-cyan-500 focus:border-cyan-500'
+                                    : 'bg-white/70 border-gray-300 text-gray-900 placeholder-gray-500 focus:ring-teal-500 focus:border-teal-500'
+                                }`}
+                                placeholder="Contoh: Meja dekat jendela, kursi bayi, dll."
+                            />
+                        </motion.div>
 
                         {/* Submit Button */}
-                        <motion.div variants={itemVariants}>
-                            <motion.button
-                                type="submit"
-                                disabled={isSubmitting}
-                                className="w-full py-4 px-6 rounded-xl font-bold text-lg text-white transition-all duration-300 flex items-center justify-center bg-gradient-to-r from-teal-500 to-cyan-600 disabled:opacity-60 disabled:cursor-not-allowed shadow-lg hover:shadow-xl hover:shadow-cyan-500/40"
-                                whileHover={{ scale: 1.03, y: -2 }}
-                                whileTap={{ scale: 0.98 }}
-                            >
-                                {isSubmitting ? (
-                                    <>
-                                        <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                                            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                                            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                                        </svg>
-                                        Memproses...
-                                    </>
-                                ) : (
-                                    'Konfirmasi Reservasi'
-                                )}
-                            </motion.button>
-                        </motion.div>
+                        <motion.button
+                            type="submit"
+                            disabled={isSubmitting}
+                            whileHover={{ scale: isSubmitting ? 1 : 1.02 }}
+                            whileTap={{ scale: isSubmitting ? 1 : 0.98 }}
+                            className={`w-full py-4 px-6 rounded-xl font-semibold text-lg transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed ${
+                              isDarkTheme
+                                ? 'bg-gradient-to-r from-cyan-600 to-teal-600 hover:from-cyan-700 hover:to-teal-700 text-white shadow-lg shadow-cyan-500/25'
+                                : 'bg-gradient-to-r from-teal-500 to-cyan-500 hover:from-teal-600 hover:to-cyan-600 text-white shadow-lg shadow-teal-500/25'
+                            }`}
+                        >
+                            {isSubmitting ? (
+                                <div className="flex items-center justify-center">
+                                    <motion.div
+                                        animate={{ rotate: 360 }}
+                                        transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
+                                        className="w-5 h-5 border-2 border-white border-t-transparent rounded-full mr-2"
+                                    />
+                                    Memproses Reservasi...
+                                </div>
+                            ) : (
+                                <div className="flex items-center justify-center">
+                                    <FiCheck className="w-5 h-5 mr-2" />
+                                    Konfirmasi Reservasi
+                                </div>
+                            )}
+                        </motion.button>
                     </form>
                 </motion.div>
 
-                {/* Info Card */}
-                <motion.div 
-                    initial={{ opacity: 0, y: 50 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.7, delay: 0.5, ease: 'easeOut' }}
-                    className="lg:col-span-2 space-y-8"
+                {/* Info Section */}
+                <motion.div
+                    initial={{ opacity: 0, x: 50 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ duration: 0.8, delay: 0.4 }}
+                    className="space-y-6"
                 >
-                    <div className="bg-white/40 backdrop-blur-xl border border-white/50 rounded-3xl p-8">
-                         <h3 className="text-2xl font-bold text-teal-800 mb-4 flex items-center"><FiClock className="mr-3 text-teal-600"/> Jam Buka</h3>
-                         <ul className="space-y-2 text-teal-700/90">
-                            <li><strong>Senin - Jumat:</strong> 07:00 - 22:00</li>
-                            <li><strong>Sabtu - Minggu:</strong> 08:00 - 23:00</li>
-                         </ul>
+                    {/* Restaurant Info Card */}
+                    <div className={`p-6 rounded-2xl backdrop-blur-xl border transition-all duration-300 ${
+                      isDarkTheme
+                        ? 'bg-gray-800/50 border-gray-600/30'
+                        : 'bg-white/50 border-white/30'
+                    }`}>
+                        <h3 className={`text-xl font-bold mb-4 ${
+                          isDarkTheme ? 'text-white' : 'text-teal-800'
+                        }`}>
+                            Informasi Penting
+                        </h3>
+                                                <div className="space-y-3">
+                            <div className={`flex items-start space-x-3 ${
+                              isDarkTheme ? 'text-gray-300' : 'text-teal-700'
+                            }`}>
+                                <FiClock className="w-5 h-5 mt-0.5 flex-shrink-0" />
+                                <div>
+                                    <p className="font-medium">Jam Operasional</p>
+                                    <p className="text-sm opacity-80">
+                                        Senin - Jumat: 07:00 - 22:00<br />
+                                        Sabtu - Minggu: 08:00 - 23:00
+                                    </p>
+                                </div>
+                            </div>
+                            <div className={`flex items-start space-x-3 ${
+                              isDarkTheme ? 'text-gray-300' : 'text-teal-700'
+                            }`}>
+                                <FiUsers className="w-5 h-5 mt-0.5 flex-shrink-0" />
+                                <div>
+                                    <p className="font-medium">Kapasitas Meja</p>
+                                    <p className="text-sm opacity-80">
+                                        Maksimal 12 orang per reservasi
+                                    </p>
+                                </div>
+                            </div>
+                            <div className={`flex items-start space-x-3 ${
+                              isDarkTheme ? 'text-gray-300' : 'text-teal-700'
+                            }`}>
+                                <FiPhone className="w-5 h-5 mt-0.5 flex-shrink-0" />
+                                <div>
+                                    <p className="font-medium">Kontak Darurat</p>
+                                    <p className="text-sm opacity-80">
+                                        (021) 1234-5678<br />
+                                        WhatsApp: +62 812-3456-7890
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
                     </div>
-                     <div className="bg-white/40 backdrop-blur-xl border border-white/50 rounded-3xl p-8">
-                         <h3 className="text-2xl font-bold text-teal-800 mb-4 flex items-center"><FiPhone className="mr-3 text-teal-600"/> Butuh Bantuan?</h3>
-                         <p className="text-teal-700/90">
-                            Untuk reservasi lebih dari 12 orang atau pertanyaan lainnya, silakan hubungi kami langsung di <strong className="text-teal-800">(021) 1234-5678</strong>.
-                         </p>
+
+                    {/* Policies Card */}
+                    <div className={`p-6 rounded-2xl backdrop-blur-xl border transition-all duration-300 ${
+                      isDarkTheme
+                        ? 'bg-gray-800/50 border-gray-600/30'
+                        : 'bg-white/50 border-white/30'
+                    }`}>
+                        <h3 className={`text-xl font-bold mb-4 ${
+                          isDarkTheme ? 'text-white' : 'text-teal-800'
+                        }`}>
+                            Kebijakan Reservasi
+                        </h3>
+                        <div className={`space-y-2 text-sm ${
+                          isDarkTheme ? 'text-gray-300' : 'text-teal-700'
+                        }`}>
+                            <p>• Reservasi dapat dibatalkan maksimal 2 jam sebelum waktu kedatangan</p>
+                            <p>• Toleransi keterlambatan maksimal 15 menit</p>
+                            <p>• Meja akan dilepas jika tamu tidak hadir tanpa konfirmasi</p>
+                            <p>• Konfirmasi reservasi akan dikirim via email dan WhatsApp</p>
+                            <p>• Untuk grup lebih dari 8 orang, harap hubungi langsung</p>
+                        </div>
+                    </div>
+
+                    {/* Special Offers Card */}
+                    <div className={`p-6 rounded-2xl backdrop-blur-xl border transition-all duration-300 ${
+                      isDarkTheme
+                        ? 'bg-gradient-to-br from-cyan-900/30 to-teal-900/30 border-cyan-500/30'
+                        : 'bg-gradient-to-br from-cyan-50/50 to-teal-50/50 border-cyan-200/50'
+                    }`}>
+                        <h3 className={`text-xl font-bold mb-4 ${
+                          isDarkTheme
+                            ? 'text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-teal-400'
+                            : 'text-transparent bg-clip-text bg-gradient-to-r from-cyan-600 to-teal-600'
+                        }`}>
+                            Penawaran Spesial
+                        </h3>
+                        <div className={`space-y-3 ${
+                          isDarkTheme ? 'text-gray-300' : 'text-teal-700'
+                        }`}>
+                            <div className={`p-3 rounded-lg ${
+                              isDarkTheme ? 'bg-cyan-500/10' : 'bg-cyan-100/50'
+                            }`}>
+                                <p className="font-medium">Happy Hour</p>
+                                <p className="text-sm opacity-80">Diskon 20% untuk minuman (14:00-17:00)</p>
+                            </div>
+                            <div className={`p-3 rounded-lg ${
+                              isDarkTheme ? 'bg-teal-500/10' : 'bg-teal-100/50'
+                            }`}>
+                                <p className="font-medium">Weekend Special</p>
+                                <p className="text-sm opacity-80">Free dessert untuk reservasi 4+ orang</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Location Preview */}
+                    <div className={`p-6 rounded-2xl backdrop-blur-xl border transition-all duration-300 ${
+                      isDarkTheme
+                        ? 'bg-gray-800/50 border-gray-600/30'
+                        : 'bg-white/50 border-white/30'
+                    }`}>
+                        <h3 className={`text-xl font-bold mb-4 ${
+                          isDarkTheme ? 'text-white' : 'text-teal-800'
+                        }`}>
+                            Lokasi Kami
+                        </h3>
+                        <div className={`aspect-video rounded-lg overflow-hidden mb-4 ${
+                          isDarkTheme ? 'bg-gray-700' : 'bg-gray-200'
+                        }`}>
+                            <img
+                                src="https://images.unsplash.com/photo-1554118811-1e0d58224f24?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80"
+                                alt="Cafenity Location"
+                                className="w-full h-full object-cover"
+                            />
+                        </div>
+                        <div className={`text-sm ${
+                          isDarkTheme ? 'text-gray-300' : 'text-teal-700'
+                        }`}>
+                            <p className="font-medium mb-1">Jl. Kopi Nikmat No. 123</p>
+                            <p className="opacity-80">Jakarta Selatan, 12345</p>
+                            <p className="opacity-80 mt-2">
+                                Mudah diakses dengan transportasi umum dan tersedia parkir gratis
+                            </p>
+                        </div>
                     </div>
                 </motion.div>
             </div>
         </div>
+
+        {/* Custom CSS for animations */}
+        <style jsx>{`
+            @keyframes blob {
+                0% {
+                    transform: translate(0px, 0px) scale(1);
+                }
+                33% {
+                    transform: translate(30px, -50px) scale(1.1);
+                }
+                66% {
+                    transform: translate(-20px, 20px) scale(0.9);
+                }
+                100% {
+                    transform: translate(0px, 0px) scale(1);
+                }
+            }
+            .animate-blob {
+                animation: blob 7s infinite;
+            }
+            .animation-delay-2000 {
+                animation-delay: 2s;
+            }
+            .animation-delay-4000 {
+                animation-delay: 4s;
+            }
+        `}</style>
     </section>
   );
 }

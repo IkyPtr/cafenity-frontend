@@ -5,7 +5,28 @@ export default function CoffeeLoading({ text = "Preparing your Cafenity experien
   const [progress, setProgress] = useState(0);
   const [liquidLevel, setLiquidLevel] = useState(0);
   const [bubbles, setBubbles] = useState([]);
+  const [isDarkTheme, setIsDarkTheme] = useState(false);
   
+  // Sync dengan dark mode dari NavbarGuest
+  useEffect(() => {
+    // Ambil initial state dari localStorage jika ada
+    const storedTheme = localStorage.getItem('isDarkTheme');
+    if (storedTheme) {
+      setIsDarkTheme(JSON.parse(storedTheme));
+    }
+
+    // Listen untuk perubahan theme dari ThemeButton
+    const handleThemeChange = (event) => {
+      setIsDarkTheme(event.detail.isDark);
+    };
+
+    window.addEventListener('themeChanged', handleThemeChange);
+
+    return () => {
+      window.removeEventListener('themeChanged', handleThemeChange);
+    };
+  }, []);
+
   // Generate random bubbles
   useEffect(() => {
     if (progress < 100) {
@@ -38,15 +59,27 @@ export default function CoffeeLoading({ text = "Preparing your Cafenity experien
   }, [progress]);
 
   return (
-    <div className="fixed inset-0 flex items-center justify-center bg-[#FFFBDE]/50 backdrop-blur-sm z-50">
+    <div className={`fixed inset-0 flex items-center justify-center backdrop-blur-sm z-50 transition-all duration-300 ${
+      isDarkTheme 
+        ? 'bg-cyan-900/70' 
+        : 'bg-[#FFFBDE]/50'
+    }`}>
       {/* Liquid glass container */}
-      <div className="relative bg-white/30 backdrop-blur-lg border border-white/40 rounded-3xl p-8 shadow-2xl w-full max-w-md mx-4 overflow-hidden">
+      <div className={`relative backdrop-blur-lg rounded-3xl p-8 shadow-2xl w-full max-w-md mx-4 overflow-hidden transition-all duration-300 ${
+        isDarkTheme
+          ? 'bg-gray-800/40 border border-cyan-700/40'
+          : 'bg-white/30 border border-white/40'
+      }`}>
         {/* Animated liquid glass background elements */}
         <div className="absolute inset-0 overflow-hidden">
           {[...Array(4)].map((_, i) => (
             <div 
               key={i}
-              className="absolute rounded-full bg-[#90D1CA]/20 backdrop-blur-sm"
+              className={`absolute rounded-full backdrop-blur-sm transition-all duration-300 ${
+                isDarkTheme
+                  ? 'bg-cyan-400/15'
+                  : 'bg-[#90D1CA]/20'
+              }`}
               style={{
                 width: `${Math.random() * 200 + 50}px`,
                 height: `${Math.random() * 200 + 50}px`,
@@ -65,17 +98,29 @@ export default function CoffeeLoading({ text = "Preparing your Cafenity experien
           {/* Coffee Cup with Liquid Glass Effect */}
           <div className="relative w-40 h-40 mb-6">
             {/* Cup */}
-            <div className="absolute bottom-0 w-full h-3/4 rounded-b-[40px] bg-gradient-to-b from-white to-[#FFFBDE] border-2 border-white/70 shadow-inner">
+            <div className={`absolute bottom-0 w-full h-3/4 rounded-b-[40px] border-2 shadow-inner transition-all duration-300 ${
+              isDarkTheme
+                ? 'bg-gradient-to-b from-gray-700 to-gray-800 border-cyan-600/70'
+                : 'bg-gradient-to-b from-white to-[#FFFBDE] border-white/70'
+            }`}>
               {/* Coffee liquid with realistic surface */}
               <div 
-                className="absolute bottom-0 w-full bg-gradient-to-b from-[#096B68] to-[#129990] rounded-b-[36px] transition-all duration-1000 overflow-hidden"
+                className={`absolute bottom-0 w-full rounded-b-[36px] transition-all duration-1000 overflow-hidden ${
+                  isDarkTheme
+                    ? 'bg-gradient-to-b from-cyan-600 to-cyan-800'
+                    : 'bg-gradient-to-b from-[#096B68] to-[#129990]'
+                }`}
                 style={{ height: `${liquidLevel}%` }}
               >
                 {/* Bubbles */}
                 {bubbles.map(bubble => (
                   <div 
                     key={bubble.id}
-                    className="absolute rounded-full bg-[#90D1CA]/70"
+                    className={`absolute rounded-full transition-all duration-300 ${
+                      isDarkTheme
+                        ? 'bg-cyan-300/70'
+                        : 'bg-[#90D1CA]/70'
+                    }`}
                     style={{
                       width: `${bubble.size}px`,
                       height: `${bubble.size}px`,
@@ -89,18 +134,30 @@ export default function CoffeeLoading({ text = "Preparing your Cafenity experien
               </div>
               
               {/* Cup rim */}
-              <div className="absolute top-0 w-full h-4 rounded-t-full bg-gradient-to-r from-[#FFFBDE] to-white border-t-2 border-white/70" />
+              <div className={`absolute top-0 w-full h-4 rounded-t-full border-t-2 transition-all duration-300 ${
+                isDarkTheme
+                  ? 'bg-gradient-to-r from-gray-700 to-gray-600 border-cyan-600/70'
+                  : 'bg-gradient-to-r from-[#FFFBDE] to-white border-white/70'
+              }`} />
             </div>
             
             {/* Handle */}
-            <div className="absolute right-0 top-1/4 h-1/2 w-1/4 rounded-r-2xl border-t-2 border-r-2 border-b-2 border-white/70 bg-[#FFFBDE]" />
+            <div className={`absolute right-0 top-1/4 h-1/2 w-1/4 rounded-r-2xl border-t-2 border-r-2 border-b-2 transition-all duration-300 ${
+              isDarkTheme
+                ? 'border-cyan-600/70 bg-gray-700'
+                : 'border-white/70 bg-[#FFFBDE]'
+            }`} />
             
             {/* Steam */}
             <div className="absolute -top-8 left-1/2 transform -translate-x-1/2 w-full flex justify-center space-x-6">
               {[0, 1, 2].map((i) => (
                 <div 
                   key={i}
-                  className="w-3 h-8 bg-white/80 rounded-full"
+                  className={`w-3 h-8 rounded-full transition-all duration-300 ${
+                    isDarkTheme
+                      ? 'bg-cyan-300/60'
+                      : 'bg-white/80'
+                  }`}
                   style={{
                     opacity: 0.5 - (i * 0.1),
                     animation: 'steam 2s infinite ease-out',
@@ -113,24 +170,42 @@ export default function CoffeeLoading({ text = "Preparing your Cafenity experien
           </div>
           
           {/* Saucer */}
-          <div className="w-44 h-3 rounded-full bg-gradient-to-r from-[#FFFBDE] to-white border border-white/50 shadow-md" />
+          <div className={`w-44 h-3 rounded-full shadow-md border transition-all duration-300 ${
+            isDarkTheme
+              ? 'bg-gradient-to-r from-gray-700 to-gray-600 border-cyan-600/50'
+              : 'bg-gradient-to-r from-[#FFFBDE] to-white border-white/50'
+          }`} />
           
           {/* Progress indicator */}
           <div className="w-full max-w-xs mt-8">
             <div className="flex justify-between items-center mb-2">
-              <FiCoffee className="text-[#096B68] text-lg" />
-              <span className="text-sm font-medium text-[#096B68]">{progress}%</span>
+              <FiCoffee className={`text-lg transition-colors duration-300 ${
+                isDarkTheme ? 'text-cyan-400' : 'text-[#096B68]'
+              }`} />
+              <span className={`text-sm font-medium transition-colors duration-300 ${
+                isDarkTheme ? 'text-cyan-300' : 'text-[#096B68]'
+              }`}>{progress}%</span>
             </div>
-            <div className="w-full bg-[#FFFBDE]/70 rounded-full h-2.5 overflow-hidden">
+            <div className={`w-full rounded-full h-2.5 overflow-hidden transition-all duration-300 ${
+              isDarkTheme
+                ? 'bg-gray-700/70'
+                : 'bg-[#FFFBDE]/70'
+            }`}>
               <div 
-                className="bg-gradient-to-r from-[#90D1CA] to-[#096B68] h-full rounded-full transition-all duration-300 shadow-inner" 
+                className={`h-full rounded-full transition-all duration-300 shadow-inner ${
+                  isDarkTheme
+                    ? 'bg-gradient-to-r from-cyan-400 to-cyan-600'
+                    : 'bg-gradient-to-r from-[#90D1CA] to-[#096B68]'
+                }`}
                 style={{ width: `${progress}%` }}
               />
             </div>
           </div>
           
           {/* Text with elegant typography */}
-          <p className="mt-6 text-center text-[#096B68] font-medium text-lg">
+          <p className={`mt-6 text-center font-medium text-lg transition-colors duration-300 ${
+            isDarkTheme ? 'text-cyan-200' : 'text-[#096B68]'
+          }`}>
             {text}
             <span className="inline-block animate-pulse">
               {progress < 100 ? '...' : '!'}
