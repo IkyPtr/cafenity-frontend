@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { FiMapPin, FiClock, FiPhone, FiMail } from 'react-icons/fi';
+import { supabase } from '../../lib/supabase';
 
 export default function ContactSection() {
   const [isDarkTheme, setIsDarkTheme] = useState(false);
@@ -46,13 +47,35 @@ export default function ContactSection() {
     setSubmitMessage('');
 
     try {
-      // Simulate form submission
-      await new Promise(resolve => setTimeout(resolve, 2000));
+      // Validasi form
+      if (!formData.name.trim() || !formData.email.trim() || !formData.message.trim()) {
+        throw new Error('Semua field harus diisi');
+      }
 
+      // Insert data ke Supabase
+      const { data, error } = await supabase
+        .from('contact_messages')
+        .insert([
+          {
+            name: formData.name.trim(),
+            email: formData.email.trim(),
+            message: formData.message.trim()
+          }
+        ])
+        .select();
+
+      if (error) {
+        console.error('Supabase error:', error);
+        throw new Error('Gagal mengirim pesan ke database');
+      }
+
+      console.log('Message sent successfully:', data);
       setSubmitMessage('Pesan berhasil dikirim! Terima kasih atas feedback Anda.');
       setFormData({ name: '', email: '', message: '' });
+      
     } catch (error) {
-      setSubmitMessage('Terjadi kesalahan. Silakan coba lagi.');
+      console.error('Error submitting contact form:', error);
+      setSubmitMessage(error.message || 'Terjadi kesalahan saat mengirim pesan. Silakan coba lagi.');
     } finally {
       setIsSubmitting(false);
     }
@@ -276,15 +299,15 @@ export default function ContactSection() {
                 whileHover={{ scale: isSubmitting ? 1 : 1.05 }}
                 whileTap={{ scale: isSubmitting ? 1 : 0.95 }}
                 className={`w-full py-3 px-6 rounded-xl font-semibold transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed ${isDarkTheme
-                    ? 'bg-gradient-to-r from-cyan-500 to-teal-500 text-white hover:from-cyan-600 hover:to-teal-600 shadow-lg hover:shadow-cyan-500/25'
-                    : 'bg-gradient-to-r from-cyan-600 to-teal-600 text-white hover:from-cyan-700 hover:to-teal-700 shadow-lg hover:shadow-cyan-600/25'
-                  }`}
+    ? 'bg-gradient-to-r from-cyan-500 to-teal-500 text-white hover:from-cyan-600 hover:to-teal-600 shadow-lg hover:shadow-cyan-500/25'
+    : 'bg-gradient-to-r from-cyan-600 to-teal-600 text-white hover:from-cyan-700 hover:to-teal-700 shadow-lg hover:shadow-cyan-600/25'
+  }`}
               >
                 {isSubmitting ? (
                   <div className="flex items-center justify-center">
                     <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white mr-2"></div>
-                    Mengirim
-                                      </div>
+                    Mengirim...
+                  </div>
                 ) : (
                   'Kirim Pesan'
                 )}
@@ -403,4 +426,3 @@ export default function ContactSection() {
     </section>
   );
 }
-
